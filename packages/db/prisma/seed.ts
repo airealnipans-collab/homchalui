@@ -139,6 +139,78 @@ async function main() {
     },
   });
 
+  // ── English + Chinese demo translations (so /en and /zh render real content, no Thai fallback) ──
+  await db.brandTranslation.upsert({
+    where: { brandId_locale: { brandId: "brand_lelabe", locale: "en" } },
+    update: {},
+    create: { brandId: "brand_lelabe", locale: "en", name: "Le Labe", slug: "le-labe", description: "A clean-scent fragrance house." },
+  });
+  await db.brandTranslation.upsert({
+    where: { brandId_locale: { brandId: "brand_lelabe", locale: "zh" } },
+    update: {},
+    create: { brandId: "brand_lelabe", locale: "zh", name: "Le Labe", slug: "le-labe", description: "主打干净香调的香水品牌。" },
+  });
+
+  await db.categoryTranslation.upsert({
+    where: { categoryId_locale: { categoryId: "cat_perfume", locale: "en" } },
+    update: {},
+    create: { categoryId: "cat_perfume", locale: "en", name: "Perfume", slug: "perfume", aeoSummary: "All perfume reviews in one place." },
+  });
+  await db.categoryTranslation.upsert({
+    where: { categoryId_locale: { categoryId: "cat_perfume", locale: "zh" } },
+    update: {},
+    create: { categoryId: "cat_perfume", locale: "zh", name: "香水", slug: "perfume", aeoSummary: "汇集所有香水评测。" },
+  });
+
+  await db.productTranslation.upsert({
+    where: { productId_locale: { productId: "prod_demo1", locale: "en" } },
+    update: {},
+    create: {
+      productId: "prod_demo1", locale: "en",
+      name: "Le Labe Fresh Tea — clean scent",
+      slug: "le-labe-fresh-tea",
+      shortDescription: "A clean, fresh everyday scent at an accessible price.",
+      reviewSummary: "A clean, fresh unisex scent with moderate longevity. Great value and beginner-friendly.",
+      pros: ["Clean, easy to wear", "Great value", "Beginner-friendly"],
+      cons: ["Moderate projection", "Doesn't last long on very hot days"],
+      bestFor: "People who like clean scents for daily/office wear under 1,000 THB",
+      notFor: "People who want very sweet scents or strong projection",
+      seoTitle: "Le Labe Fresh Tea review — a clean, great-value scent | Homchalui",
+      seoDescription: "Le Labe Fresh Tea review: clean and fresh, moderate longevity, with scores and where to buy.",
+      aeoSummary: "Le Labe Fresh Tea is a clean, fresh unisex perfume from 339–369 THB, moderate longevity, ideal for beginners and office wear.",
+      faqItems: [
+        { q: "How long does it last?", a: "About 4–6 hours in normal conditions." },
+        { q: "Is it for men or women?", a: "It's a unisex scent for everyone." },
+      ],
+      translationStatus: "published",
+      publishedAt: new Date(),
+    },
+  });
+  await db.productTranslation.upsert({
+    where: { productId_locale: { productId: "prod_demo1", locale: "zh" } },
+    update: {},
+    create: {
+      productId: "prod_demo1", locale: "zh",
+      name: "Le Labe Fresh Tea 清新香调",
+      slug: "le-labe-fresh-tea",
+      shortDescription: "干净清新的日常香水，价格亲民。",
+      reviewSummary: "干净清新的中性香，持久度中等，性价比高，适合新手。",
+      pros: ["干净易驾驭", "性价比高", "适合新手"],
+      cons: ["扩散度中等", "炎热天气持久度一般"],
+      bestFor: "喜欢干净香调、日常/通勤、预算 1000 泰铢以内的人",
+      notFor: "喜欢甜腻香或追求强扩散的人",
+      seoTitle: "Le Labe Fresh Tea 评测 — 干净高性价比香水 | Homchalui",
+      seoDescription: "Le Labe Fresh Tea 评测：干净清新、持久度中等，附评分与购买渠道。",
+      aeoSummary: "Le Labe Fresh Tea 是一款干净清新的中性香水，售价 339–369 泰铢，持久度中等，适合新手和通勤。",
+      faqItems: [
+        { q: "能持续多久？", a: "正常情况下约 4–6 小时。" },
+        { q: "适合男性还是女性？", a: "这是一款中性香，男女皆宜。" },
+      ],
+      translationStatus: "published",
+      publishedAt: new Date(),
+    },
+  });
+
   // Merchant links (tracked via /go/:id)
   const links = [
     { id: "lnk_1", merchantId: "mch_shopee", affiliateUrl: "https://shopee.co.th/product/demo?aff=homchalui", price: 339, priority: 1 },

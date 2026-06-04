@@ -1,9 +1,17 @@
 // apps/web/lib/categories.ts
 // Category / brand / scent-family resolvers — published-translation-only, cached. Powered by 2T9COME.
 // NO Thai fallback: a missing translation in `locale` resolves to null → the page calls notFound().
+import type { Metadata } from "next";
 import { db } from "@homchalui/db";
 import { withCache } from "@homchalui/redis";
-import type { Locale } from "@homchalui/i18n";
+import { localizedPath, type Locale } from "@homchalui/i18n";
+import { categoryAlternates, brandAlternates, scentAlternates, metadataAlternates } from "./locale";
+
+const NOT_FOUND: Record<Locale, { cat: string; brand: string; scent: string }> = {
+  th: { cat: "ไม่พบหมวดหมู่ | หอมฉลุย", brand: "ไม่พบแบรนด์ | หอมฉลุย", scent: "ไม่พบกลิ่น | หอมฉลุย" },
+  en: { cat: "Category not found | Homchalui", brand: "Brand not found | Homchalui", scent: "Scent not found | Homchalui" },
+  zh: { cat: "未找到分类 | Homchalui", brand: "未找到品牌 | Homchalui", scent: "未找到香调 | Homchalui" },
+};
 
 export interface CategoryInfo {
   id: string;
@@ -113,4 +121,39 @@ export function getScentFamily(slug: string, locale: Locale): Promise<ScentInfo 
     },
     [`scent:${locale}:${slug}`],
   );
+}
+
+// ───────────────────────── Page metadata (canonical + hreflang) ─────────────────────────
+
+export async function categoryMetadata(slug: string, locale: Locale): Promise<Metadata> {
+  const cat = await getCategoryBySlug(slug, locale);
+  if (!cat) return { title: NOT_FOUND[locale].cat, robots: { index: false } };
+  const { canonical, languages } = metadataAlternates(localizedPath(locale, `/category/${cat.slug}`), await categoryAlternates(cat.id));
+  return {
+    title: cat.seoTitle ?? `${cat.name} | หอมฉลุย`,
+    description: cat.seoDescription ?? cat.description ?? undefined,
+    alternates: { canonical, languages },
+  };
+}
+
+export async function brandMetadata(slug: string, locale: Locale): Promise<Metadata> {
+  const brand = await getBrandBySlug(slug, locale);
+  if (!brand) return { title: NOT_FOUND[locale].brand, robots: { index: false } };
+  const { canonical, languages } = metadataAlternates(localizedPath(locale, `/brand/${brand.slug}`), await brandAlternates(brand.id));
+  return {
+    title: brand.seoTitle ?? `${brand.name} | หอมฉลุย`,
+    description: brand.seoDescription ?? brand.description ?? undefined,
+    alternates: { canonical, languages },
+  };
+}
+
+export async function scentMetadata(slug: string, locale: Locale): Promise<Metadata> {
+  const scent = await getScentFamily(slug, locale);
+  if (!scent) return { title: NOT_FOUND[locale].scent, robots: { index: false } };
+  const { canonical, languages } = metadataAlternates(localizedPath(locale, `/scent/${scent.slug}`), await scentAlternates(scent.slug));
+  return {
+    title: `${scent.name} | หอมฉลุย`,
+    description: `รวมของหอมกลิ่น${scent.name} ที่รีวิวและเปรียบเทียบโดยหอมฉลุย`,
+    alternates: { canonical, languages },
+  };
 }
