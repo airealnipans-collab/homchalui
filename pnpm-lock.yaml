@@ -175,6 +175,9 @@ importers:
       '@homchalui/i18n':
         specifier: workspace:*
         version: link:../i18n
+      '@homchalui/validators':
+        specifier: workspace:*
+        version: link:../validators
     devDependencies:
       '@types/react':
         specifier: ^18.3.0
