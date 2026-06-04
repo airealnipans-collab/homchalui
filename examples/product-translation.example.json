@@ -1,0 +1,28 @@
+{
+  "productId": "prod_abc123",
+  "locale": "th",
+  "name": "น้ำหอมกลิ่นสะอาด Le Labe Fresh Tea",
+  "slug": "le-labe-fresh-tea",
+  "shortDescription": "น้ำหอมกลิ่นสะอาด สดชื่น เหมาะใส่ทุกวัน ราคาเข้าถึงง่าย",
+  "fullDescription": "รีวิวละเอียด... กลิ่นเปิดด้วยส้มเบอกาม็อต ตามด้วยชาขาวและมะลิ ...",
+  "reviewSummary": "กลิ่นสะอาดสดชื่นแบบ unisex ติดทนปานกลาง คุ้มราคา เหมาะกับมือใหม่และใส่ทำงาน",
+  "pros": ["กลิ่นสะอาด ใส่ง่าย", "คุ้มราคา", "เหมาะกับมือใหม่"],
+  "cons": ["การกระจายตัวปานกลาง", "ติดทนไม่นานมากในวันที่ร้อนจัด"],
+  "bestFor": "คนชอบกลิ่นสะอาด ใส่ทำงาน/ทุกวัน งบไม่เกิน 1,000",
+  "notFor": "คนชอบกลิ่นหวานจัดหรืออยากได้ projection แรง",
+  "seoTitle": "รีวิว Le Labe Fresh Tea น้ำหอมกลิ่นสะอาด คุ้มราคา | หอมฉลุย",
+  "seoDescription": "รีวิว Le Labe Fresh Tea กลิ่นสะอาดสดชื่น ติดทนปานกลาง พร้อมคะแนนและช่องทางซื้อ Shopee/Lazada/TikTok",
+  "ogTitle": "รีวิว Le Labe Fresh Tea",
+  "ogDescription": "กลิ่นสะอาด สดชื่น คุ้มราคา เหมาะมือใหม่",
+  "ogImageUrl": "https://cdn.homchalui.com/products/abc123/og-th.webp",
+  "canonicalUrl": "https://homchalui.com/product/le-labe-fresh-tea",
+  "aeoSummary": "Le Labe Fresh Tea คือน้ำหอม unisex กลิ่นสะอาดสดชื่น ราคาเริ่ม 339-369 บาท ติดทนปานกลาง เหมาะกับมือใหม่และใส่ทำงาน ซื้อได้ที่ Shopee, Lazada, TikTok Shop",
+  "faqItems": [
+    { "q": "ติดทนกี่ชั่วโมง?", "a": "ประมาณ 4-6 ชั่วโมงในสภาพอากาศปกติ" },
+    { "q": "เหมาะกับผู้ชายหรือผู้หญิง?", "a": "เป็นกลิ่น unisex ใส่ได้ทั้งสองเพศ" },
+    { "q": "ซื้อได้ที่ไหน?", "a": "Shopee, Lazada และ TikTok Shop ราคาเริ่มต้นประมาณ 339 บาท" }
+  ],
+  "schemaOverride": null,
+  "translationStatus": "published",
+  "publishedAt": "2026-05-20T08:00:00.000Z"
+}

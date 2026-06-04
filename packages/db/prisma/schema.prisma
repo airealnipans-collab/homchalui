@@ -1,0 +1,647 @@
+// หอมฉลุย (Homchalui) — Prisma schema. Powered by 2T9COME.
+// Review Commerce Platform: products presented e-commerce-style, sold via external merchants.
+// Locale-specific text lives in *_translations tables (NOT JSONB blobs). See docs/DATABASE.md.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────── Enums ───────────────────────────
+enum Locale {
+  th
+  en
+  zh
+}
+
+enum PublishStatus {
+  draft
+  published
+  archived
+}
+
+enum TranslationStatus {
+  missing
+  draft
+  machine_translated
+  needs_review
+  approved
+  published
+  outdated
+}
+
+enum MerchantKey {
+  shopee
+  lazada
+  central
+  amazon
+  tiktok
+  official
+  custom
+}
+
+enum LinkStatus {
+  active
+  broken
+  disabled
+}
+
+enum RankingKey {
+  trending
+  best_click
+  editorial
+  personalize
+}
+
+enum JobStatus {
+  idle
+  running
+  ok
+  failed
+}
+
+// ─────────────────────────── Core / auth ───────────────────────────
+model User {
+  id          String     @id @default(cuid())
+  email       String     @unique
+  passwordHash String?   @map("password_hash")
+  name        String?
+  isActive    Boolean    @default(true) @map("is_active")
+  totpSecret  String?    @map("totp_secret")
+  roles       UserRole[]
+  auditLogs   AdminAuditLog[]
+  createdAt   DateTime   @default(now()) @map("created_at")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+  @@map("users")
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  users       UserRole[]
+  permissions RolePermission[]
+  @@map("roles")
+}
+
+model Permission {
+  id    String           @id @default(cuid())
+  key   String           @unique // e.g. product.create
+  roles RolePermission[]
+  @@map("permissions")
+}
+
+model UserRole {
+  userId String @map("user_id")
+  roleId String @map("role_id")
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role   Role   @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  @@id([userId, roleId])
+  @@map("user_roles")
+}
+
+model RolePermission {
+  roleId       String     @map("role_id")
+  permissionId String     @map("permission_id")
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ─────────────────────────── Catalog ───────────────────────────
+model Brand {
+  id           String             @id @default(cuid())
+  logoUrl      String?            @map("logo_url")
+  websiteUrl   String?            @map("website_url")
+  products     Product[]
+  translations BrandTranslation[]
+  createdAt    DateTime           @default(now()) @map("created_at")
+  updatedAt    DateTime           @updatedAt @map("updated_at")
+  @@map("brands")
+}
+
+model BrandTranslation {
+  id             String  @id @default(cuid())
+  brandId        String  @map("brand_id")
+  locale         Locale
+  name           String
+  slug           String
+  description    String?
+  seoTitle       String? @map("seo_title")
+  seoDescription String? @map("seo_description")
+  brand          Brand   @relation(fields: [brandId], references: [id], onDelete: Cascade)
+  @@unique([brandId, locale])
+  @@unique([locale, slug])
+  @@map("brand_translations")
+}
+
+model Category {
+  id            String                @id @default(cuid())
+  parentId      String?               @map("parent_id")
+  parent        Category?             @relation("CategoryTree", fields: [parentId], references: [id])
+  children      Category[]            @relation("CategoryTree")
+  sortOrder     Int                   @default(0) @map("sort_order")
+  icon          String?
+  products       Product[]            @relation("PrimaryCategory")
+  productLinks   ProductCategory[]
+  translations  CategoryTranslation[]
+  createdAt     DateTime              @default(now()) @map("created_at")
+  updatedAt     DateTime              @updatedAt @map("updated_at")
+  @@index([parentId])
+  @@map("categories")
+}
+
+model CategoryTranslation {
+  id             String   @id @default(cuid())
+  categoryId     String   @map("category_id")
+  locale         Locale
+  name           String
+  slug           String
+  description    String?
+  seoTitle       String?  @map("seo_title")
+  seoDescription String?  @map("seo_description")
+  aeoSummary     String?  @map("aeo_summary")
+  category       Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  @@unique([categoryId, locale])
+  @@unique([locale, slug])
+  @@map("category_translations")
+}
+
+model Product {
+  id                 String   @id @default(cuid())
+  brandId            String   @map("brand_id")
+  primaryCategoryId  String   @map("primary_category_id")
+  status             PublishStatus @default(draft)
+  priceMin           Decimal? @map("price_min") @db.Decimal(12, 2)
+  priceMax           Decimal? @map("price_max") @db.Decimal(12, 2)
+  currency           String   @default("THB")
+  mainImageUrl       String?  @map("main_image_url")
+  manualBoost        Float    @default(0) @map("manual_boost")
+  manualPin          Boolean  @default(false) @map("manual_pin")
+  excludeFromRanking Boolean  @default(false) @map("exclude_from_ranking")
+  campaignTag        String?  @map("campaign_tag")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  brand           Brand                  @relation(fields: [brandId], references: [id])
+  primaryCategory Category               @relation("PrimaryCategory", fields: [primaryCategoryId], references: [id])
+  categories      ProductCategory[]
+  translations    ProductTranslation[]
+  images          ProductImage[]
+  scentProfile    ProductScentProfile?
+  scores          ProductScore?
+  merchantLinks   ProductMerchantLink[]
+  reviews         ProductReview[]
+  tags            ProductTag[]
+
+  @@index([brandId])
+  @@index([primaryCategoryId])
+  @@index([status])
+  @@map("products")
+}
+
+model ProductTranslation {
+  id                String            @id @default(cuid())
+  productId         String            @map("product_id")
+  locale            Locale
+  name              String
+  slug              String
+  shortDescription  String?           @map("short_description")
+  fullDescription   String?           @map("full_description")
+  reviewSummary     String?           @map("review_summary")
+  pros              String[]
+  cons              String[]
+  bestFor           String?           @map("best_for")
+  notFor            String?           @map("not_for")
+  seoTitle          String?           @map("seo_title")
+  seoDescription    String?           @map("seo_description")
+  ogTitle           String?           @map("og_title")
+  ogDescription     String?           @map("og_description")
+  ogImageUrl        String?           @map("og_image_url")
+  canonicalUrl      String?           @map("canonical_url")
+  aeoSummary        String?           @map("aeo_summary")
+  faqItems          Json?             @map("faq_items")
+  schemaOverride    Json?             @map("schema_override")
+  translationStatus TranslationStatus @default(draft) @map("translation_status")
+  translatedBy      String?           @map("translated_by")
+  reviewedBy        String?           @map("reviewed_by")
+  publishedAt       DateTime?         @map("published_at")
+  createdAt         DateTime          @default(now()) @map("created_at")
+  updatedAt         DateTime          @updatedAt @map("updated_at")
+  product           Product           @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@unique([productId, locale])
+  @@unique([locale, slug])
+  @@index([translationStatus])
+  @@map("product_translations")
+}
+
+model ProductCategory {
+  productId  String   @map("product_id")
+  categoryId String   @map("category_id")
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  @@id([productId, categoryId])
+  @@map("product_categories")
+}
+
+model ProductImage {
+  id        String  @id @default(cuid())
+  productId String  @map("product_id")
+  url       String
+  altTextTh String? @map("alt_text_th")
+  altTextEn String? @map("alt_text_en")
+  altTextZh String? @map("alt_text_zh")
+  sortOrder Int     @default(0) @map("sort_order")
+  isMain    Boolean @default(false) @map("is_main")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@index([productId])
+  @@map("product_images")
+}
+
+model ProductScentProfile {
+  id           String   @id @default(cuid())
+  productId    String   @unique @map("product_id")
+  scentFamily  String?  @map("scent_family")
+  mood         String[]
+  season       String[]
+  occasion     String[]
+  genderTarget String?  @map("gender_target")
+  topNotes     String[] @map("top_notes")
+  middleNotes  String[] @map("middle_notes")
+  baseNotes    String[] @map("base_notes")
+  product      Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@map("product_scent_profiles")
+}
+
+model ProductScore {
+  id               String  @id @default(cuid())
+  productId        String  @unique @map("product_id")
+  scent            Float   @default(0)
+  longevity        Float   @default(0)
+  projection       Float   @default(0)
+  sillage          Float   @default(0)
+  value            Float   @default(0)
+  sweetness        Float   @default(0)
+  freshness        Float   @default(0)
+  luxury           Float   @default(0)
+  beginnerFriendly Float   @default(0) @map("beginner_friendly")
+  overallCached    Float   @default(0) @map("overall_cached")
+  product          Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  @@map("product_scores")
+}
+
+model Merchant {
+  id        String                @id @default(cuid())
+  key       MerchantKey
+  name      String
+  logoUrl   String?               @map("logo_url")
+  baseDomain String?              @map("base_domain")
+  isActive  Boolean               @default(true) @map("is_active")
+  links     ProductMerchantLink[]
+  stats     MerchantClickStat[]
+  @@map("merchants")
+}
+
+model ProductMerchantLink {
+  id            String     @id @default(cuid())
+  productId     String     @map("product_id")
+  merchantId    String     @map("merchant_id")
+  normalUrl     String?    @map("normal_url")
+  affiliateUrl  String     @map("affiliate_url")
+  price         Decimal?   @db.Decimal(12, 2)
+  currency      String?    @default("THB")
+  priority      Int        @default(0)
+  status        LinkStatus @default(active)
+  lastCheckedAt DateTime?  @map("last_checked_at")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+  product       Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  merchant      Merchant   @relation(fields: [merchantId], references: [id])
+  @@index([productId])
+  @@index([merchantId])
+  @@map("product_merchant_links")
+}
+
+model Tag {
+  id       String       @id @default(cuid())
+  key      String       @unique
+  kind     String?      // mood | occasion | season | scent_family | ...
+  products ProductTag[]
+  @@map("tags")
+}
+
+model ProductTag {
+  productId String  @map("product_id")
+  tagId     String  @map("tag_id")
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  @@id([productId, tagId])
+  @@map("product_tags")
+}
+
+// ─────────────────────────── Reviews ───────────────────────────
+model ProductReview {
+  id          String   @id @default(cuid())
+  productId   String   @map("product_id")
+  locale      Locale
+  title       String
+  body        String
+  reviewer    String?
+  rating      Float
+  pros        String[]
+  cons        String[]
+  bestFor     String?  @map("best_for")
+  notFor      String?  @map("not_for")
+  tested      Boolean  @default(false)
+  sponsored   Boolean  @default(false)
+  publishedAt DateTime? @map("published_at")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  images      ProductReviewImage[]
+  @@index([productId, locale])
+  @@map("product_reviews")
+}
+
+model ProductReviewImage {
+  id       String        @id @default(cuid())
+  reviewId String        @map("review_id")
+  url      String
+  altText  String?       @map("alt_text")
+  review   ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  @@map("product_review_images")
+}
+
+// ─────────────────────────── Content ───────────────────────────
+model Article {
+  id           String               @id @default(cuid())
+  status       PublishStatus        @default(draft)
+  coverImageUrl String?             @map("cover_image_url")
+  authorId     String?              @map("author_id")
+  translations ArticleTranslation[]
+  createdAt    DateTime             @default(now()) @map("created_at")
+  updatedAt    DateTime             @updatedAt @map("updated_at")
+  @@map("articles")
+}
+
+model ArticleTranslation {
+  id             String            @id @default(cuid())
+  articleId      String            @map("article_id")
+  locale         Locale
+  title          String
+  slug           String
+  excerpt        String?
+  content        String
+  seoTitle       String?           @map("seo_title")
+  seoDescription String?           @map("seo_description")
+  aeoSummary     String?           @map("aeo_summary")
+  faqItems       Json?             @map("faq_items")
+  status         TranslationStatus @default(draft)
+  article        Article           @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  @@unique([articleId, locale])
+  @@unique([locale, slug])
+  @@map("article_translations")
+}
+
+model SeoMetadata {
+  id           String   @id @default(cuid())
+  pageType     String   @map("page_type")
+  entityId     String?  @map("entity_id")
+  locale       Locale
+  title        String?
+  description  String?
+  canonicalUrl String?  @map("canonical_url")
+  ogImageUrl   String?  @map("og_image_url")
+  robots       String?
+  updatedAt    DateTime @updatedAt @map("updated_at")
+  @@unique([pageType, entityId, locale])
+  @@map("seo_metadata")
+}
+
+model SchemaOverride {
+  id       String @id @default(cuid())
+  pageType String @map("page_type")
+  entityId String @map("entity_id")
+  locale   Locale
+  jsonld   Json
+  @@unique([pageType, entityId, locale])
+  @@map("schema_overrides")
+}
+
+// ─────────────────────────── Layout ───────────────────────────
+model LayoutPage {
+  id        String          @id @default(cuid())
+  key       String          // home | landing:<campaign>
+  locale    Locale
+  status    PublishStatus   @default(draft)
+  sections  LayoutSection[]
+  updatedAt DateTime        @updatedAt @map("updated_at")
+  @@unique([key, locale])
+  @@map("layout_pages")
+}
+
+model LayoutSection {
+  id           String     @id @default(cuid())
+  layoutPageId String     @map("layout_page_id")
+  type         String     // hero | product_carousel | category_grid | trending_list | editorial_picks | article_block | custom_html
+  sortOrder    Int        @default(0) @map("sort_order")
+  config       Json
+  isActive     Boolean    @default(true) @map("is_active")
+  layoutPage   LayoutPage @relation(fields: [layoutPageId], references: [id], onDelete: Cascade)
+  @@index([layoutPageId])
+  @@map("layout_sections")
+}
+
+// ─────────────────────────── Analytics ───────────────────────────
+model TrackingEvent {
+  id         String   @id @default(cuid())
+  event      String
+  locale     Locale
+  productId  String?  @map("product_id")
+  merchantId String?  @map("merchant_id")
+  sessionId  String   @map("session_id")
+  userId     String?  @map("user_id")
+  device     String?
+  source     String?
+  medium     String?
+  campaign   String?
+  pageUrl    String   @map("page_url")
+  referrer   String?
+  payload    Json?
+  createdAt  DateTime @default(now()) @map("created_at")
+  @@index([event, createdAt])
+  @@index([productId, locale, createdAt])
+  @@index([locale, createdAt])
+  @@map("tracking_events")
+}
+
+model ProductHourlyStat {
+  id               String   @id @default(cuid())
+  productId        String   @map("product_id")
+  locale           Locale
+  views            Int      @default(0)
+  detailClicks     Int      @default(0) @map("detail_clicks")
+  outboundClicks   Int      @default(0) @map("outbound_clicks")
+  wishlist         Int      @default(0)
+  reviewEngagement Int      @default(0) @map("review_engagement")
+  ctr              Float    @default(0)
+  calculatedAt     DateTime @map("calculated_at")
+  @@unique([productId, locale, calculatedAt])
+  @@index([locale, calculatedAt])
+  @@map("product_hourly_stats")
+}
+
+model ProductDailyStat {
+  id             String   @id @default(cuid())
+  productId      String   @map("product_id")
+  locale         Locale
+  views          Int      @default(0)
+  detailClicks   Int      @default(0) @map("detail_clicks")
+  outboundClicks Int      @default(0) @map("outbound_clicks")
+  uniqueClickers Int      @default(0) @map("unique_clickers")
+  ctr            Float    @default(0)
+  date           DateTime @db.Date
+  @@unique([productId, locale, date])
+  @@map("product_daily_stats")
+}
+
+model MerchantClickStat {
+  id             String   @id @default(cuid())
+  merchantId     String   @map("merchant_id")
+  locale         Locale
+  date           DateTime @db.Date
+  outboundClicks Int      @default(0) @map("outbound_clicks")
+  uniqueClickers Int      @default(0) @map("unique_clickers")
+  ctr            Float    @default(0)
+  merchant       Merchant @relation(fields: [merchantId], references: [id])
+  @@unique([merchantId, locale, date])
+  @@map("merchant_click_stats")
+}
+
+model SearchQueryStat {
+  id           String   @id @default(cuid())
+  locale       Locale
+  query        String
+  count        Int      @default(0)
+  resultsCount Int      @default(0) @map("results_count")
+  zeroResult   Boolean  @default(false) @map("zero_result")
+  date         DateTime @db.Date
+  @@unique([locale, query, date])
+  @@map("search_query_stats")
+}
+
+// ─────────────────────────── Ranking ───────────────────────────
+model RankingConfig {
+  id            String     @id @default(cuid())
+  key           RankingKey
+  version       Int        @default(1)
+  weights       Json
+  timeWindow    String?    @map("time_window")
+  bouncePenalty Float      @default(0) @map("bounce_penalty")
+  isActive      Boolean    @default(false) @map("is_active")
+  createdBy     String?    @map("created_by")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  @@unique([key, version])
+  @@map("ranking_configs")
+}
+
+model RankingSnapshot {
+  id         String     @id @default(cuid())
+  key        RankingKey
+  locale     Locale
+  productId  String     @map("product_id")
+  score      Float
+  rank       Int
+  computedAt DateTime   @map("computed_at")
+  @@index([key, locale, rank])
+  @@map("ranking_snapshots")
+}
+
+model RecommendationSnapshot {
+  id         String   @id @default(cuid())
+  scope      String   // similar | personal
+  anchorId   String   @map("anchor_id")
+  locale     Locale
+  productId  String   @map("product_id")
+  score      Float
+  computedAt DateTime @map("computed_at")
+  @@index([scope, anchorId, locale])
+  @@map("recommendation_snapshots")
+}
+
+// ─────────────────────────── i18n ───────────────────────────
+model LocaleConfig {
+  code      String  @id // th | en | zh
+  label     String
+  isDefault Boolean @default(false) @map("is_default")
+  isActive  Boolean @default(true) @map("is_active")
+  @@map("locales")
+}
+
+model TranslationJob {
+  id           String            @id @default(cuid())
+  entityType   String            @map("entity_type")
+  entityId     String            @map("entity_id")
+  targetLocale Locale            @map("target_locale")
+  status       TranslationStatus @default(draft)
+  requestedBy  String?           @map("requested_by")
+  createdAt    DateTime          @default(now()) @map("created_at")
+  finishedAt   DateTime?         @map("finished_at")
+  @@index([entityType, entityId])
+  @@map("translation_jobs")
+}
+
+model TranslationLog {
+  id         String            @id @default(cuid())
+  entityType String            @map("entity_type")
+  entityId   String            @map("entity_id")
+  locale     Locale
+  fromStatus TranslationStatus @map("from_status")
+  toStatus   TranslationStatus @map("to_status")
+  actorId    String?           @map("actor_id")
+  note       String?
+  createdAt  DateTime          @default(now()) @map("created_at")
+  @@map("translation_logs")
+}
+
+// ─────────────────────────── System ───────────────────────────
+model AdminAuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?  @map("actor_id")
+  action     String
+  entityType String   @map("entity_type")
+  entityId   String?  @map("entity_id")
+  before     Json?
+  after      Json?
+  ip         String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  actor      User?    @relation(fields: [actorId], references: [id])
+  @@index([entityType, entityId])
+  @@map("admin_audit_logs")
+}
+
+model SystemJob {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  status    JobStatus @default(idle)
+  lastRunAt DateTime? @map("last_run_at")
+  lastError String?   @map("last_error")
+  meta      Json?
+  @@map("system_jobs")
+}
+
+model MediaAsset {
+  id         String   @id @default(cuid())
+  url        String
+  kind       String?
+  width      Int?
+  height     Int?
+  sizeBytes  Int?     @map("size_bytes")
+  uploadedBy String?  @map("uploaded_by")
+  createdAt  DateTime @default(now()) @map("created_at")
+  @@map("media_assets")
+}

@@ -1,0 +1,38 @@
+{
+  "key": "trending",
+  "version": 3,
+  "isActive": true,
+  "timeWindow": "24h",
+  "bouncePenalty": 0.5,
+  "weights": {
+    "view_count": 1,
+    "outbound_click": 3,
+    "product_detail_click": 2,
+    "wishlist_count": 2,
+    "review_engagement": 1.5
+  },
+  "notes": "Trending is computed per-locale. best_click / editorial have their own configs.",
+  "examples": {
+    "best_click": {
+      "key": "best_click",
+      "timeWindow": "7d",
+      "weights": {
+        "outbound_click": 4,
+        "unique_clicker": 3,
+        "merchant_link_ctr": 2,
+        "product_page_conversion": 3
+      }
+    },
+    "editorial": {
+      "key": "editorial",
+      "weights": {
+        "scent_score": 0.25,
+        "longevity_score": 0.2,
+        "projection_score": 0.15,
+        "value_score": 0.2,
+        "uniqueness_score": 0.1,
+        "beginner_friendly_score": 0.1
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "type": "product_carousel",
+  "title": "น้ำหอมมาแรงวันนี้",
+  "source": "trending",
+  "limit": 12,
+  "category": "perfume",
+  "sort": "trending_score",
+  "isActive": true,
+  "sortOrder": 3,
+  "options": {
+    "locale": "th",
+    "showBadges": true,
+    "showMerchantCount": true
+  }
+}

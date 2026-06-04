@@ -1,0 +1,41 @@
+version: "3.9"
+
+# Local development services for หอมฉลุย (Powered by 2T9COME)
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: homchalui-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: homchalui
+      POSTGRES_PASSWORD: homchalui
+      POSTGRES_DB: homchalui
+    ports:
+      - "5432:5432"
+    volumes:
+      - homchalui_pg:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: homchalui-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - homchalui_redis:/data
+
+  # Enable from Phase 2 onward (search). Phase 1 uses Postgres full-text search.
+  # meilisearch:
+  #   image: getmeili/meilisearch:v1.8
+  #   container_name: homchalui-meili
+  #   environment:
+  #     MEILI_MASTER_KEY: dev_master_key
+  #   ports:
+  #     - "7700:7700"
+  #   volumes:
+  #     - homchalui_meili:/meili_data
+
+volumes:
+  homchalui_pg:
+  homchalui_redis:
+  # homchalui_meili:

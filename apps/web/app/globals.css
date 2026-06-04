@@ -1,0 +1,53 @@
+/* apps/web/app/globals.css — หอมฉลุย official theme. Powered by 2T9COME. */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Official design tokens (see docs/DESIGN_SYSTEM.md) ──────────────────────
+   Backoffice may override --brand etc. at runtime for campaign theming. */
+:root {
+  /* Surfaces */
+  --bg-primary: #FFF8F1;     /* page background */
+  --bg-secondary: #F7EFE6;   /* sections / strips */
+  --bg-card: #FFFFFF;        /* cards */
+
+  /* Brand */
+  --brand: #B8895B;          /* primary brand — price, CTA, active nav */
+  --brand-dark: #7A5436;     /* headings, pressed states */
+  --accent-gold: #D8B26E;    /* stars, badges, secondary accents */
+
+  /* Text */
+  --text-main: #2F2923;
+  --text-secondary: #6F6258;
+  --text-muted: #9A8D82;
+
+  /* Decorative (category / scent tints) */
+  --soft-pink: #EFC7C2;
+  --lavender: #DCD4F2;
+  --sage: #B8C7A8;
+
+  /* Lines & semantic */
+  --border: #E8DCCD;
+  --success: #6F8F72;        /* "คุ้มสุด", tested, in-stock */
+  --warning: #D89C45;        /* sponsored, attention */
+  --error: #C7665A;          /* discount tag, broken link */
+
+  --font-sans: "Noto Sans Thai", "Inter", system-ui, sans-serif;
+
+  /* ── Backward-compatible aliases (older components still resolve) ── */
+  --bg-cream: var(--bg-primary);
+  --accent-pink: var(--soft-pink);
+  --accent-lavender: var(--lavender);
+  --text-brown: var(--brand-dark);
+  --text-charcoal: var(--text-main);
+}
+
+html {
+  background: var(--bg-primary);
+  color: var(--text-main);
+}
+
+body {
+  font-family: var(--font-sans);
+  min-height: 100dvh;
+}

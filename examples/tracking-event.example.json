@@ -1,0 +1,20 @@
+{
+  "event": "affiliate_outbound_click",
+  "locale": "th",
+  "product_id": "prod_abc123",
+  "product_name": "Le Labe Fresh Tea",
+  "brand": "Le Labe",
+  "category": "perfume",
+  "merchant": "Shopee",
+  "source_page": "/product/le-labe-fresh-tea",
+  "link_id": "lnk_1",
+  "session_id": "sess_8f2a9c",
+  "user_id": null,
+  "device": "mobile",
+  "source": "google",
+  "medium": "organic",
+  "campaign": null,
+  "page_url": "https://homchalui.com/product/le-labe-fresh-tea",
+  "referrer": "https://www.google.com/",
+  "timestamp": "2026-06-03T10:00:00.000Z"
+}

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="32" height="32" role="img" aria-label="หอมฉลุย">
+  <title>หอมฉลุย</title>
+  <rect x="2" y="2" width="92" height="92" rx="22" fill="#FFF7EE"/>
+  <path d="M0 0 C 6 -5 6 -13 0 -18 C -6 -13 -6 -5 0 0 Z" fill="#D8C6E8" transform="translate(40 47) rotate(-38)"/>
+  <path d="M0 0 C 6 -5 6 -13 0 -18 C -6 -13 -6 -5 0 0 Z" fill="#B7C8A6" transform="translate(57 48) rotate(40)"/>
+  <path d="M0 0 C 5 -4 5 -11 0 -15 C -5 -11 -5 -4 0 0 Z" fill="#F2C6D4" transform="translate(49 40) rotate(4)"/>
+  <path d="M48 59 C 40 50 58 45 49.5 37 C 44 31 55 26.5 48.5 18.5 C 44.5 13.5 49.5 10 47 7" fill="none" stroke="#D4AF37" stroke-width="4.6" stroke-linecap="round"/>
+  <path d="M0 -7 C 0.6 -2 2 -0.6 7 0 C 2 0.6 0.6 2 0 7 C -0.6 2 -2 0.6 -7 0 C -2 -0.6 -0.6 -2 0 -7 Z" fill="#D4AF37" transform="translate(62 18) scale(0.85)"/>
+  <rect x="31" y="58" width="34" height="7" rx="3.5" fill="#D4AF37"/>
+  <path d="M34 65 L62 65 L58.5 84 C58 87 56 88.5 53 88.5 L43 88.5 C40 88.5 38 87 37.5 84 Z" fill="#D4AF37"/>
+  <path d="M42 71 Q48 77 54 71" fill="none" stroke="#8B5E34" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,25 @@
+{
+  "name": "@homchalui/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "job": "tsx src/run-once.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "@homchalui/config": "workspace:*",
+    "@homchalui/db": "workspace:*",
+    "@homchalui/redis": "workspace:*",
+    "@homchalui/ranking": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/node-cron": "^3.0.11",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

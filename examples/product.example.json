@@ -1,0 +1,40 @@
+{
+  "id": "prod_abc123",
+  "brand": { "id": "brand_xyz", "slug": "le-labe", "name": "Le Labe" },
+  "primaryCategory": { "id": "cat_perfume", "slug": "perfume", "name": "น้ำหอม" },
+  "status": "published",
+  "priceMin": 350,
+  "priceMax": 2890,
+  "currency": "THB",
+  "mainImageUrl": "https://cdn.homchalui.com/products/abc123/main.webp",
+  "manualBoost": 0,
+  "manualPin": false,
+  "excludeFromRanking": false,
+  "campaignTag": null,
+  "scores": {
+    "scent": 8.5, "longevity": 7.0, "projection": 6.5, "sillage": 6.0,
+    "value": 8.0, "sweetness": 4.0, "freshness": 7.5, "luxury": 7.0,
+    "beginnerFriendly": 8.0, "overallCached": 7.7
+  },
+  "scentProfile": {
+    "scentFamily": "fresh-floral",
+    "mood": ["clean", "calm"],
+    "season": ["summer", "spring"],
+    "occasion": ["daily", "work"],
+    "genderTarget": "unisex",
+    "topNotes": ["bergamot", "mandarin"],
+    "middleNotes": ["jasmine", "white tea"],
+    "baseNotes": ["white musk", "cedar"]
+  },
+  "merchantLinks": [
+    { "id": "lnk_1", "merchant": "Shopee", "priority": 1, "price": 350, "currency": "THB",
+      "status": "active", "go": "/go/lnk_1" },
+    { "id": "lnk_2", "merchant": "Lazada", "priority": 2, "price": 369, "currency": "THB",
+      "status": "active", "go": "/go/lnk_2" },
+    { "id": "lnk_3", "merchant": "TikTok Shop", "priority": 3, "price": 339, "currency": "THB",
+      "status": "active", "go": "/go/lnk_3" }
+  ],
+  "badges": ["trending", "best_value"],
+  "stats": { "outboundClicks7d": 412, "views24h": 1830 },
+  "translation": { "$ref": "product-translation.example.json" }
+}

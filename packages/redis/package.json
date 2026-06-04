@@ -1,0 +1,16 @@
+{
+  "name": "@homchalui/redis",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "ioredis": "^5.4.0",
+    "@homchalui/config": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

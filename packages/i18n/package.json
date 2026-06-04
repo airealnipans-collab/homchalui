@@ -1,0 +1,13 @@
+{
+  "name": "@homchalui/i18n",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config": "./src/config.ts"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

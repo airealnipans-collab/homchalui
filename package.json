@@ -1,0 +1,26 @@
+{
+  "name": "homchalui",
+  "private": true,
+  "version": "0.1.0",
+  "description": "หอมฉลุย — Review Commerce Platform for fragrance & home-scent products. Powered by 2T9COME.",
+  "packageManager": "pnpm@9.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "db:migrate": "pnpm --filter @homchalui/db migrate:dev",
+    "db:seed": "pnpm --filter @homchalui/db seed",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
+  },
+  "devDependencies": {
+    "turbo": "^2.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.5.0"
+  }
+}

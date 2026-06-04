@@ -1,0 +1,30 @@
+{
+  "pageType": "product",
+  "entityId": "prod_abc123",
+  "locale": "th",
+  "title": "รีวิว Le Labe Fresh Tea น้ำหอมกลิ่นสะอาด คุ้มราคา | หอมฉลุย",
+  "description": "รีวิว Le Labe Fresh Tea กลิ่นสะอาดสดชื่น ติดทนปานกลาง พร้อมคะแนนและช่องทางซื้อ",
+  "canonicalUrl": "https://homchalui.com/product/le-labe-fresh-tea",
+  "ogImageUrl": "https://cdn.homchalui.com/products/abc123/og-th.webp",
+  "robots": "index,follow",
+  "hreflang": [
+    { "locale": "th", "href": "https://homchalui.com/product/le-labe-fresh-tea" },
+    { "locale": "en", "href": "https://homchalui.com/en/product/le-labe-fresh-tea-en" },
+    { "locale": "x-default", "href": "https://homchalui.com/product/le-labe-fresh-tea" }
+  ],
+  "jsonLd": {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": "Le Labe Fresh Tea",
+    "brand": { "@type": "Brand", "name": "Le Labe" },
+    "image": "https://cdn.homchalui.com/products/abc123/main.webp",
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": 4.3, "reviewCount": 27 },
+    "offers": {
+      "@type": "AggregateOffer",
+      "priceCurrency": "THB",
+      "lowPrice": 339,
+      "highPrice": 369,
+      "offerCount": 3
+    }
+  }
+}
