@@ -5,6 +5,7 @@
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/SiteHeader";
 import { Footer } from "@/components/Footer";
+import { PageViewTracker } from "@/components/analytics/PageViewTracker";
 import { parsePrefixedLocale } from "@/lib/locale";
 
 export default function LocaleLayout({
@@ -19,6 +20,7 @@ export default function LocaleLayout({
 
   return (
     <>
+      <PageViewTracker locale={locale} />
       <SiteHeader locale={locale} />
       {children}
       <Footer locale={locale} />

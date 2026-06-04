@@ -4,6 +4,7 @@ const nextConfig = {
   reactStrictMode: true,
   // Transpile workspace packages (shipped as TS).
   transpilePackages: [
+    "@homchalui/analytics",
     "@homchalui/config",
     "@homchalui/db",
     "@homchalui/i18n",

@@ -5,12 +5,7 @@
 // navigates to /go/:linkId (records server-side, 302s to the affiliate URL). It NEVER links to
 // the raw affiliate URL directly.
 import type { Locale } from "@homchalui/i18n";
-
-declare global {
-  interface Window {
-    dataLayer?: Record<string, unknown>[];
-  }
-}
+import { clickMerchantLink } from "@homchalui/analytics";
 
 interface Props {
   linkId: string;
@@ -33,17 +28,8 @@ export function MerchantButton({
   const href = `/go/${linkId}?locale=${locale}&sid=${encodeURIComponent(sessionId)}&src=${encodeURIComponent(sourcePage)}`;
 
   function onClick() {
-    window.dataLayer?.push({
-      event: "click_merchant_link",
-      locale, // REQUIRED on every event
-      product_id: productId,
-      product_name: productName,
-      merchant,
-      price: price ?? undefined,
-      session_id: sessionId,
-      page_url: sourcePage,
-      timestamp: new Date().toISOString(),
-    });
+    // Canonical click_merchant_link via the analytics dataLayer (full envelope incl. locale).
+    clickMerchantLink(locale, { productId, productName, merchant, price });
   }
 
   const rowBorder = cheapest ? "border-[1.5px] border-success" : "border border-line";

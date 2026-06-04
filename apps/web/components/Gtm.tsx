@@ -1,18 +1,15 @@
 // apps/web/components/Gtm.tsx — Google Tag Manager + dataLayer bootstrap.
-// หอมฉลุย — Powered by 2T9COME. No-op if NEXT_PUBLIC_GTM_ID is unset.
+// หอมฉลุย — Powered by 2T9COME. No-op if NEXT_PUBLIC_GTM_ID is unset. Snippet from @homchalui/analytics.
 import Script from "next/script";
 import { clientEnv } from "@homchalui/config/env";
+import { gtmSnippet, gtmNoscriptSrc } from "@homchalui/analytics";
 
 export function GtmScript() {
   const id = clientEnv.NEXT_PUBLIC_GTM_ID;
   if (!id) return null;
   return (
     <Script id="gtm-init" strategy="afterInteractive">
-      {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','${id}');`}
+      {gtmSnippet(id)}
     </Script>
   );
 }
@@ -22,12 +19,7 @@ export function GtmNoScript() {
   if (!id) return null;
   return (
     <noscript>
-      <iframe
-        src={`https://www.googletagmanager.com/ns.html?id=${id}`}
-        height="0"
-        width="0"
-        style={{ display: "none", visibility: "hidden" }}
-      />
+      <iframe src={gtmNoscriptSrc(id)} height="0" width="0" style={{ display: "none", visibility: "hidden" }} />
     </noscript>
   );
 }

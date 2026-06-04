@@ -33,3 +33,25 @@ broken links, missing SEO — all sliceable by **locale**, date, device, source/
 ## Locale analytics
 Compare traffic, CTR, and outbound clicks across th/en/zh; surface "should translate next"
 (high-traffic untranslated products) and per-locale keyword performance.
+
+## GTM → GA4 configuration (WP7)
+The site pushes the catalog events to `window.dataLayer` (see `packages/analytics`); GTM maps them
+to GA4. Configure once in the GTM container (`NEXT_PUBLIC_GTM_ID`):
+
+1. **GA4 Configuration tag** — Google tag with the GA4 Measurement ID (`NEXT_PUBLIC_GA4_ID`),
+   firing on **Initialization – All Pages**.
+2. **Data Layer Variables** (one per envelope/param field): `locale`, `session_id`, `page_url`,
+   `product_id`, `product_name`, `brand`, `category`, `merchant`, `list_name`, `position`,
+   `price`, `search_term`, `results_count`, `filter_type`, `filter_value`, `sort_key`, `percent`,
+   `page_type`, `link_id`, `source_page`.
+3. **Custom Event triggers** — one per catalog event name (`view_item`, `view_item_list`,
+   `select_item`, `search`, `filter_apply`, `sort_apply`, `click_merchant_link`, `scroll_depth`,
+   `page_view`, …); trigger on Custom Event = the event name.
+4. **GA4 Event tags** — one per trigger, event name = the same catalog name, with the relevant
+   Data Layer Variables mapped as event parameters. **Always include `locale`** as a parameter
+   (and register it as a custom dimension in GA4) so every report can slice by locale.
+5. **Consent** — gate marketing/analytics tags behind GTM Consent Mode. Business-critical
+   `affiliate_outbound_click` is recorded server-side in `/go/:linkId` regardless of consent.
+
+Event names + the required envelope are defined in `packages/analytics` and validated against
+`packages/validators/tracking.ts` (in development, each pushed event is checked).

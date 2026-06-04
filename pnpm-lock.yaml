@@ -20,6 +20,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@homchalui/analytics':
+        specifier: workspace:*
+        version: link:../../packages/analytics
       '@homchalui/config':
         specifier: workspace:*
         version: link:../../packages/config
@@ -128,6 +131,22 @@ importers:
         specifier: ^5.5.0
         version: 5.9.3
 
+  packages/analytics:
+    dependencies:
+      '@homchalui/i18n':
+        specifier: workspace:*
+        version: link:../i18n
+      '@homchalui/validators':
+        specifier: workspace:*
+        version: link:../validators
+    devDependencies:
+      typescript:
+        specifier: ^5.5.0
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(@types/node@20.19.41)
+
   packages/config:
     dependencies:
       zod:
@@ -193,6 +212,9 @@ importers:
 
   packages/ui:
     dependencies:
+      '@homchalui/analytics':
+        specifier: workspace:*
+        version: link:../analytics
       '@homchalui/i18n':
         specifier: workspace:*
         version: link:../i18n

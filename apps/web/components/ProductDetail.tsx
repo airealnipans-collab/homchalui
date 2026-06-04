@@ -14,6 +14,8 @@ import { productLd, breadcrumbLd, faqLd, ld, type Crumb } from "@/lib/seo/jsonld
 import { buildMetadata, notFoundMetadata } from "@/lib/seo/metadata";
 import { MerchantButton } from "@/components/MerchantButton";
 import { ProductActionBar } from "@/components/ProductActionBar";
+import { ProductAnalytics } from "@/components/analytics/ProductAnalytics";
+import { ScrollDepthTracker } from "@/components/analytics/ScrollDepthTracker";
 
 const NOT_FOUND_TITLE: Record<Locale, string> = {
   th: "ไม่พบสินค้า | หอมฉลุย",
@@ -95,6 +97,8 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ld(...buildJsonLd(p, locale, crumbs)) }} />
+      <ProductAnalytics locale={locale} productId={p.id} productName={t.name} brand={p.brand.name} category={p.brand.slug} price={p.priceMin} />
+      <ScrollDepthTracker locale={locale} pageType="product" />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Breadcrumb items={crumbs} locale={locale} />
 
