@@ -1,0 +1,4 @@
+# pnpm workspace definition — หอมฉลุย. Powered by 2T9COME.
+packages:
+  - "apps/*"
+  - "packages/*"

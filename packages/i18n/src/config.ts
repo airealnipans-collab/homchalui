@@ -36,7 +36,7 @@ export function localizedPath(locale: Locale, path: string): string {
 
 /** Extract locale from a pathname. Absence of a known prefix => default (th). */
 export function localeFromPath(pathname: string): Locale {
-  const seg = pathname.split("/").filter(Boolean)[0];
+  const seg = pathname.split("/").filter(Boolean)[0] ?? "";
   return (PREFIXED_LOCALES as string[]).includes(seg) ? (seg as Locale) : DEFAULT_LOCALE;
 }
 

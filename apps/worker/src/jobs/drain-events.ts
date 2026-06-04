@@ -7,14 +7,18 @@ import { drainEvents } from "@homchalui/redis";
 
 type RawEvent = Record<string, unknown>;
 
+const LOCALES = ["th", "en", "zh"] as const;
+type Loc = (typeof LOCALES)[number];
+
 function str(v: unknown): string | null {
   return typeof v === "string" ? v : null;
 }
 
 function mapEvent(e: RawEvent) {
-  const locale = str(e.locale);
+  const rawLocale = str(e.locale);
   const event = str(e.event);
-  if (!event || (locale !== "th" && locale !== "en" && locale !== "zh")) return null;
+  if (!event || rawLocale === null || !LOCALES.includes(rawLocale as Loc)) return null;
+  const locale = rawLocale as Loc;
   return {
     event,
     locale,

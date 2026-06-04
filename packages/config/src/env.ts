@@ -9,8 +9,12 @@
 import { z } from "zod";
 
 /** Reusable refinements */
+// Empty env values arrive as "" (e.g. `DATABASE_REPLICA_URL=` in .env). Treat blank as unset so
+// optional fields validate. Applied to every optional field below.
+const emptyToUndefined = (v: unknown) => (typeof v === "string" && v.trim() === "" ? undefined : v);
 const url = z.string().url();
-const optionalUrl = z.string().url().optional();
+const optionalUrl = z.preprocess(emptyToUndefined, z.string().url().optional());
+const optionalString = z.preprocess(emptyToUndefined, z.string().optional());
 const cron = z
   .string()
   .regex(/^(\S+\s+){4}\S+$/, "must be a 5-field cron expression");
@@ -41,14 +45,14 @@ const serverSchema = z.object({
   NEXTAUTH_URL: optionalUrl,
 
   // Object storage (Cloudflare R2 / S3-compatible)
-  R2_ACCOUNT_ID: z.string().optional(),
-  R2_ACCESS_KEY_ID: z.string().optional(),
-  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_ACCOUNT_ID: optionalString,
+  R2_ACCESS_KEY_ID: optionalString,
+  R2_SECRET_ACCESS_KEY: optionalString,
   R2_BUCKET: z.string().default("homchalui-media"),
   R2_PUBLIC_BASE_URL: optionalUrl,
 
   // Observability
-  SENTRY_DSN: z.string().optional(),
+  SENTRY_DSN: optionalString,
 
   // Worker / job schedules (cron)
   RANKING_RECALC_CRON: cron.default("0 * * * *"),
@@ -67,8 +71,8 @@ const clientSchema = z.object({
   NEXT_PUBLIC_SITE_URL: url,
   NEXT_PUBLIC_DEFAULT_LOCALE: z.enum(["th", "en", "zh"]).default("th"),
   NEXT_PUBLIC_SUPPORTED_LOCALES: localeList,
-  NEXT_PUBLIC_GTM_ID: z.string().regex(/^GTM-[A-Z0-9]+$/).optional(),
-  NEXT_PUBLIC_GA4_ID: z.string().regex(/^G-[A-Z0-9]+$/).optional(),
+  NEXT_PUBLIC_GTM_ID: z.preprocess(emptyToUndefined, z.string().regex(/^GTM-[A-Z0-9]+$/).optional()),
+  NEXT_PUBLIC_GA4_ID: z.preprocess(emptyToUndefined, z.string().regex(/^G-[A-Z0-9]+$/).optional()),
 });
 
 /** Cross-field rules. */
@@ -83,7 +87,8 @@ function refine<T extends { NEXT_PUBLIC_DEFAULT_LOCALE: "th" | "en" | "zh"; NEXT
   return e;
 }
 
-const isServer = typeof window === "undefined";
+// Use globalThis so this compiles in non-DOM contexts too (the worker tsconfig has no "dom" lib).
+const isServer = typeof (globalThis as { window?: unknown }).window === "undefined";
 
 function format(error: z.ZodError): string {
   return error.issues.map((i) => `  - ${i.path.join(".") || "(root)"}: ${i.message}`).join("\n");

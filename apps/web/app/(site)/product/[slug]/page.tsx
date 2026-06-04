@@ -4,8 +4,8 @@
 // here since this IS Thai). Emits SEO metadata + Product/Review/AggregateRating/FAQ JSON-LD.
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { randomUUID } from "node:crypto";
 import { getProductBySlug } from "@/lib/products";
+import { getSessionId } from "@/lib/session";
 import { MerchantButton } from "@/components/MerchantButton";
 import { ProductActionBar } from "@/components/ProductActionBar";
 import { clientEnv } from "@homchalui/config/env";
@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: Params) {
   if (!p) notFound(); // no fallback — unpublished/missing => 404
 
   const t = p.translation;
-  const sessionId = randomUUID(); // replace with real session cookie in middleware
+  const sessionId = getSessionId(); // stable per-visitor id (cookie set in middleware)
   const sourcePage = `/product/${t.slug}`;
   const prices = p.merchantLinks.map((l) => l.price).filter((x): x is number => x != null);
   const cheapestPrice = prices.length ? Math.min(...prices) : null;
