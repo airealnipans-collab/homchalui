@@ -24,6 +24,7 @@ function main() {
   schedule(env.STATS_ROLLUP_CRON, "rollup-stats");
   schedule(env.RANKING_RECALC_CRON, "ranking");
   schedule(env.LINK_CHECK_CRON, "link-check");
+  schedule(env.SITEMAP_CRON, "sitemap");
 
   // Keep the process alive.
   process.on("SIGTERM", () => process.exit(0));

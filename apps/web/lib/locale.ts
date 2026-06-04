@@ -1,21 +1,20 @@
 // apps/web/lib/locale.ts
 // Locale routing helpers + per-entity alternates. หอมฉลุย — Powered by 2T9COME.
-// Alternates power the LanguageSwitcher (maps to the EQUIVALENT entity per locale) and hreflang.
-// Only locales with a real (published) translation are included — never a Thai fallback.
+// Alternates power the LanguageSwitcher (maps to the EQUIVALENT entity per locale) and hreflang
+// (lib/seo/hreflang.ts). Only locales with a real (published) translation are included — never a
+// Thai fallback. Canonical/hreflang formatting lives in lib/seo/hreflang (re-exported here).
 import { db } from "@homchalui/db";
 import { localizedPath, type Locale } from "@homchalui/i18n";
-import { clientEnv } from "@homchalui/config/env";
+import type { Alternates } from "./seo/hreflang";
 
-const SITE = clientEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+export { metadataAlternates } from "./seo/hreflang";
+export type { Alternates } from "./seo/hreflang";
 
 /** Locales that carry a URL prefix. Thai (default) has none; `/th` never exists. */
 export type PrefixedLocale = "en" | "zh";
 export function parsePrefixedLocale(value: string): PrefixedLocale | null {
   return value === "en" || value === "zh" ? value : null;
 }
-
-/** locale → localized relative path of the equivalent entity (only where it exists). */
-export type Alternates = Partial<Record<Locale, string>>;
 
 export async function productAlternates(productId: string): Promise<Alternates> {
   const trs = await db.productTranslation.findMany({
@@ -56,18 +55,4 @@ export async function scentAlternates(family: string): Promise<Alternates> {
 /** Home exists in every locale. */
 export function homeAlternates(): Alternates {
   return { th: "/", en: "/en", zh: "/zh" };
-}
-
-/**
- * Convert alternates → Next `Metadata.alternates` (absolute URLs). Emits hreflang per locale +
- * `x-default` (Thai when present). The LanguageSwitcher reads these <link> tags from the DOM.
- */
-export function metadataAlternates(canonicalPath: string, alts: Alternates): {
-  canonical: string;
-  languages: Record<string, string>;
-} {
-  const languages: Record<string, string> = {};
-  for (const [loc, path] of Object.entries(alts)) languages[loc] = `${SITE}${path}`;
-  if (alts.th) languages["x-default"] = `${SITE}${alts.th}`;
-  return { canonical: `${SITE}${canonicalPath}`, languages };
 }

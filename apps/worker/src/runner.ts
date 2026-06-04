@@ -6,12 +6,14 @@ import { drainEventsJob } from "./jobs/drain-events";
 import { rollupStatsJob } from "./jobs/rollup-stats";
 import { rankingJob } from "./jobs/ranking";
 import { linkCheckJob } from "./jobs/link-check";
+import { sitemapJob } from "./jobs/sitemap";
 
 export const JOBS = {
   "drain-events": { fn: drainEventsJob, lockTtlMs: 60_000 },
   "rollup-stats": { fn: rollupStatsJob, lockTtlMs: 5 * 60_000 },
   ranking: { fn: rankingJob, lockTtlMs: 5 * 60_000 },
   "link-check": { fn: linkCheckJob, lockTtlMs: 20 * 60_000 },
+  sitemap: { fn: sitemapJob, lockTtlMs: 5 * 60_000 },
 } as const;
 
 export type JobName = keyof typeof JOBS;

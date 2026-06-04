@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 import { db } from "@homchalui/db";
 import { withCache } from "@homchalui/redis";
 import { localizedPath, type Locale } from "@homchalui/i18n";
-import { categoryAlternates, brandAlternates, scentAlternates, metadataAlternates } from "./locale";
+import { categoryAlternates, brandAlternates, scentAlternates } from "./locale";
+import { buildMetadata, notFoundMetadata } from "./seo/metadata";
 
 const NOT_FOUND: Record<Locale, { cat: string; brand: string; scent: string }> = {
   th: { cat: "ไม่พบหมวดหมู่ | หอมฉลุย", brand: "ไม่พบแบรนด์ | หอมฉลุย", scent: "ไม่พบกลิ่น | หอมฉลุย" },
@@ -127,33 +128,36 @@ export function getScentFamily(slug: string, locale: Locale): Promise<ScentInfo 
 
 export async function categoryMetadata(slug: string, locale: Locale): Promise<Metadata> {
   const cat = await getCategoryBySlug(slug, locale);
-  if (!cat) return { title: NOT_FOUND[locale].cat, robots: { index: false } };
-  const { canonical, languages } = metadataAlternates(localizedPath(locale, `/category/${cat.slug}`), await categoryAlternates(cat.id));
-  return {
+  if (!cat) return notFoundMetadata(NOT_FOUND[locale].cat);
+  return buildMetadata({
+    locale,
     title: cat.seoTitle ?? `${cat.name} | หอมฉลุย`,
-    description: cat.seoDescription ?? cat.description ?? undefined,
-    alternates: { canonical, languages },
-  };
+    description: cat.seoDescription ?? cat.description,
+    canonicalPath: localizedPath(locale, `/category/${cat.slug}`),
+    alternates: await categoryAlternates(cat.id),
+  });
 }
 
 export async function brandMetadata(slug: string, locale: Locale): Promise<Metadata> {
   const brand = await getBrandBySlug(slug, locale);
-  if (!brand) return { title: NOT_FOUND[locale].brand, robots: { index: false } };
-  const { canonical, languages } = metadataAlternates(localizedPath(locale, `/brand/${brand.slug}`), await brandAlternates(brand.id));
-  return {
+  if (!brand) return notFoundMetadata(NOT_FOUND[locale].brand);
+  return buildMetadata({
+    locale,
     title: brand.seoTitle ?? `${brand.name} | หอมฉลุย`,
-    description: brand.seoDescription ?? brand.description ?? undefined,
-    alternates: { canonical, languages },
-  };
+    description: brand.seoDescription ?? brand.description,
+    canonicalPath: localizedPath(locale, `/brand/${brand.slug}`),
+    alternates: await brandAlternates(brand.id),
+  });
 }
 
 export async function scentMetadata(slug: string, locale: Locale): Promise<Metadata> {
   const scent = await getScentFamily(slug, locale);
-  if (!scent) return { title: NOT_FOUND[locale].scent, robots: { index: false } };
-  const { canonical, languages } = metadataAlternates(localizedPath(locale, `/scent/${scent.slug}`), await scentAlternates(scent.slug));
-  return {
+  if (!scent) return notFoundMetadata(NOT_FOUND[locale].scent);
+  return buildMetadata({
+    locale,
     title: `${scent.name} | หอมฉลุย`,
     description: `รวมของหอมกลิ่น${scent.name} ที่รีวิวและเปรียบเทียบโดยหอมฉลุย`,
-    alternates: { canonical, languages },
-  };
+    canonicalPath: localizedPath(locale, `/scent/${scent.slug}`),
+    alternates: await scentAlternates(scent.slug),
+  });
 }

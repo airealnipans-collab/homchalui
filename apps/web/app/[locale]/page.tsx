@@ -5,7 +5,8 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { localizedPath } from "@homchalui/i18n";
 import { ProductGrid } from "@homchalui/ui";
-import { parsePrefixedLocale, homeAlternates, metadataAlternates } from "@/lib/locale";
+import { parsePrefixedLocale, homeAlternates } from "@/lib/locale";
+import { buildMetadata } from "@/lib/seo/metadata";
 import { resolveListQuery } from "@/lib/list-page";
 import { listProducts } from "@/lib/listing";
 import { getSessionId } from "@/lib/session";
@@ -28,12 +29,13 @@ type Props = { params: { locale: string } };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = parsePrefixedLocale(params.locale);
   if (!locale) return { robots: { index: false } };
-  const { canonical, languages } = metadataAlternates(localizedPath(locale, "/"), homeAlternates());
-  return {
+  return buildMetadata({
+    locale,
     title: locale === "zh" ? "Homchalui 香氛 — 香氛评测" : "Homchalui — Fragrance reviews",
     description: HERO[locale].subtitle,
-    alternates: { canonical, languages },
-  };
+    canonicalPath: localizedPath(locale, "/"),
+    alternates: homeAlternates(),
+  });
 }
 
 export default async function LocaleHome({ params }: Props) {

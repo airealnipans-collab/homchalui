@@ -1,21 +1,20 @@
 // apps/web/components/ProductDetail.tsx
 // Shared product-detail view + metadata, locale-parameterized. หอมฉลุย — Powered by 2T9COME.
-// Used by both /product/[slug] (th) and /[locale]/product/[slug] (en/zh). Published-only, no Thai
-// fallback (missing translation → notFound). Emits Product/AggregateOffer/AggregateRating/FAQ/
-// Breadcrumb JSON-LD + hreflang alternates.
+// Used by /product/[slug] (th) and /[locale]/product/[slug] (en/zh). Published-only, no Thai
+// fallback (missing translation → notFound). SEO via lib/seo/* (Product/AggregateOffer/
+// AggregateRating/FAQ/Breadcrumb JSON-LD + canonical + hreflang).
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { localizedPath, type Locale } from "@homchalui/i18n";
-import { clientEnv } from "@homchalui/config/env";
 import { Breadcrumb, FAQBlock, type FaqItem } from "@homchalui/ui";
 import { getProductBySlug, type ProductDetail as ProductDetailVM } from "@/lib/products";
 import { getSessionId } from "@/lib/session";
-import { productAlternates, metadataAlternates } from "@/lib/locale";
+import { productAlternates } from "@/lib/locale";
+import { productLd, breadcrumbLd, faqLd, ld, type Crumb } from "@/lib/seo/jsonld";
+import { buildMetadata, notFoundMetadata } from "@/lib/seo/metadata";
 import { MerchantButton } from "@/components/MerchantButton";
 import { ProductActionBar } from "@/components/ProductActionBar";
 
-const SITE = clientEnv.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
-const OG_LOCALE: Record<Locale, string> = { th: "th_TH", en: "en_US", zh: "zh_CN" };
 const NOT_FOUND_TITLE: Record<Locale, string> = {
   th: "ไม่พบสินค้า | หอมฉลุย",
   en: "Product not found | Homchalui",
@@ -42,70 +41,38 @@ function parseFaq(raw: unknown): FaqItem[] {
 
 export async function productMetadata(slug: string, locale: Locale): Promise<Metadata> {
   const p = await getProductBySlug(slug, locale);
-  if (!p) return { title: NOT_FOUND_TITLE[locale], robots: { index: false } };
+  if (!p) return notFoundMetadata(NOT_FOUND_TITLE[locale]);
   const t = p.translation;
-  const canonicalPath = localizedPath(locale, `/product/${t.slug}`);
-  const { canonical, languages } = metadataAlternates(canonicalPath, await productAlternates(p.id));
-  return {
+  return buildMetadata({
+    locale,
     title: t.seoTitle ?? `${t.name} | หอมฉลุย`,
-    description: t.seoDescription ?? t.shortDescription ?? undefined,
-    alternates: { canonical: t.canonicalUrl ?? canonical, languages },
-    openGraph: {
-      title: t.seoTitle ?? t.name,
-      description: t.seoDescription ?? undefined,
-      url: canonical,
-      images: t.ogImageUrl ? [t.ogImageUrl] : p.mainImageUrl ? [p.mainImageUrl] : [],
-      locale: OG_LOCALE[locale],
-      type: "website",
-    },
-    twitter: { card: "summary_large_image" },
-  };
+    description: t.seoDescription ?? t.shortDescription,
+    canonicalPath: localizedPath(locale, `/product/${t.slug}`),
+    alternates: await productAlternates(p.id),
+    canonicalOverride: t.canonicalUrl,
+    image: t.ogImageUrl ?? p.mainImageUrl,
+  });
 }
 
-function jsonLd(p: ProductDetailVM, locale: Locale, crumbs: { label: string; href?: string }[]) {
+function buildJsonLd(p: ProductDetailVM, locale: Locale, crumbs: Crumb[]) {
   const t = p.translation;
-  const product: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    name: t.name,
-    brand: { "@type": "Brand", name: p.brand.name },
-    image: p.mainImageUrl ?? undefined,
-    description: t.shortDescription ?? undefined,
-    inLanguage: locale,
-  };
-  if (p.priceMin != null) {
-    product.offers = {
-      "@type": "AggregateOffer",
-      priceCurrency: p.currency,
-      lowPrice: p.priceMin,
-      highPrice: p.priceMax ?? p.priceMin,
+  const graph: unknown[] = [
+    productLd({
+      name: t.name,
+      brandName: p.brand.name,
+      image: p.mainImageUrl,
+      description: t.shortDescription,
+      locale,
+      currency: p.currency,
+      priceMin: p.priceMin,
+      priceMax: p.priceMax,
       offerCount: p.merchantLinks.length,
-    };
-  }
-  if (p.rating) {
-    product.aggregateRating = { "@type": "AggregateRating", ratingValue: p.rating.value, reviewCount: p.rating.count };
-  }
-  const graph: Record<string, unknown>[] = [
-    product,
-    {
-      "@context": "https://schema.org",
-      "@type": "BreadcrumbList",
-      itemListElement: crumbs.map((c, i) => ({
-        "@type": "ListItem",
-        position: i + 1,
-        name: c.label,
-        ...(c.href ? { item: `${SITE}${c.href}` } : {}),
-      })),
-    },
+      rating: p.rating,
+    }),
+    breadcrumbLd(crumbs),
   ];
   const faq = parseFaq(t.faqItems);
-  if (faq.length) {
-    graph.push({
-      "@context": "https://schema.org",
-      "@type": "FAQPage",
-      mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
-    });
-  }
+  if (faq.length) graph.push(faqLd(faq));
   return graph;
 }
 
@@ -119,7 +86,7 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
   const faq = parseFaq(t.faqItems);
   const prices = p.merchantLinks.map((l) => l.price).filter((x): x is number => x != null);
   const cheapestPrice = prices.length ? Math.min(...prices) : null;
-  const crumbs = [
+  const crumbs: Crumb[] = [
     { label: HOME_LABEL[locale], href: localizedPath(locale, "/") },
     { label: p.brand.name, href: localizedPath(locale, `/brand/${p.brand.slug}`) },
     { label: t.name },
@@ -127,7 +94,7 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd(p, locale, crumbs)) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ld(...buildJsonLd(p, locale, crumbs)) }} />
       <main className="mx-auto max-w-6xl px-4 py-6">
         <Breadcrumb items={crumbs} locale={locale} />
 
