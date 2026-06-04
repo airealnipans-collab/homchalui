@@ -1,8 +1,12 @@
 // packages/db/prisma/seed.ts — idempotent seed for หอมฉลุย. Powered by 2T9COME.
 // Run: pnpm --filter @homchalui/db seed   (needs DATABASE_URL)
 import { PrismaClient } from "@prisma/client";
+import bcrypt from "bcryptjs";
 
 const db = new PrismaClient();
+
+// DEV ONLY — change SEED_ADMIN_PASSWORD (or this default) before any real deployment.
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "admin1234";
 
 async function main() {
   // ── Locales (Thai = default) ──
@@ -33,14 +37,14 @@ async function main() {
   }
 
   // ── Admin user (CHANGE the password hash before any real deployment) ──
+  const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, 10);
   const admin = await db.user.upsert({
     where: { email: "admin@homchalui.com" },
-    update: {},
+    update: { passwordHash }, // keep dev login working on re-seed
     create: {
       email: "admin@homchalui.com",
       name: "Homchalui Admin",
-      // TODO: replace with a real argon2/bcrypt hash; this is a dev placeholder.
-      passwordHash: "$2a$10$DEV_PLACEHOLDER_CHANGE_ME",
+      passwordHash,
     },
   });
   await db.userRole.upsert({

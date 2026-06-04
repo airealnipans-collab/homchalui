@@ -2,3 +2,4 @@
 export * from "./tracking";
 export * from "./query";
 export * from "./product";
+export * from "./admin";

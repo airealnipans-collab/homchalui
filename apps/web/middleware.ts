@@ -7,12 +7,13 @@
 //    server components can attach it to tracking on the very first request too.
 //  - /admin is guarded (placeholder — wire real auth/RBAC here).
 import { NextResponse, type NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 import { SESSION_COOKIE } from "@/lib/session";
 
 const PREFIXED = ["en", "zh"] as const;
 const SESSION_MAX_AGE = 60 * 60 * 24 * 365; // 1 year
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   // Never allow a /th prefix — strip it and redirect to the canonical Thai URL.
@@ -20,6 +21,18 @@ export function middleware(req: NextRequest) {
     const url = req.nextUrl.clone();
     url.pathname = pathname.replace(/^\/th/, "") || "/";
     return NextResponse.redirect(url, 308);
+  }
+
+  // Backoffice guard: require a session for /admin/* (except the login page). Per-permission
+  // checks happen in the route handlers (/api/admin/* guard themselves via requirePermission).
+  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
+    const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+    if (!token) {
+      const url = req.nextUrl.clone();
+      url.pathname = "/admin/login";
+      url.search = `?from=${encodeURIComponent(pathname)}`;
+      return NextResponse.redirect(url);
+    }
   }
 
   // Resolve locale from the first segment.
@@ -34,12 +47,6 @@ export function middleware(req: NextRequest) {
   const requestHeaders = new Headers(req.headers);
   requestHeaders.set("x-locale", locale);
   requestHeaders.set("x-session-id", sessionId);
-
-  // Admin guard placeholder (replace with NextAuth session + RBAC check in WP6).
-  if (pathname.startsWith("/admin")) {
-    // const session = await getSession(req); if (!session) return NextResponse.redirect(loginUrl);
-    // Intentionally pass through for now; real guard added with auth.
-  }
 
   const res = NextResponse.next({ request: { headers: requestHeaders } });
 
