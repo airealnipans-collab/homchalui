@@ -87,6 +87,24 @@ export function productLd(p: ProductLdInput) {
   return node;
 }
 
+export function articleLd(input: {
+  title: string;
+  description?: string | null;
+  url: string;
+  image?: string | null;
+  locale: Locale;
+}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: input.title,
+    description: input.description ?? undefined,
+    image: input.image ?? undefined,
+    inLanguage: input.locale,
+    mainEntityOfPage: input.url,
+  };
+}
+
 export function organizationLd() {
   return {
     "@context": "https://schema.org",

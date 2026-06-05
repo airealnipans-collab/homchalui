@@ -379,12 +379,14 @@ model ProductReviewImage {
 // ─────────────────────────── Content ───────────────────────────
 model Article {
   id           String               @id @default(cuid())
+  kind         String               @default("article") // article | guide
   status       PublishStatus        @default(draft)
   coverImageUrl String?             @map("cover_image_url")
   authorId     String?              @map("author_id")
   translations ArticleTranslation[]
   createdAt    DateTime             @default(now()) @map("created_at")
   updatedAt    DateTime             @updatedAt @map("updated_at")
+  @@index([kind])
   @@map("articles")
 }
 

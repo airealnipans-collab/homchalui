@@ -6,7 +6,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { localizedPath, type Locale } from "@homchalui/i18n";
-import { Breadcrumb, FAQBlock, ReviewSummary, type FaqItem } from "@homchalui/ui";
+import { Breadcrumb, FAQBlock, ReviewSummary, ScentProfile, Gallery, type FaqItem } from "@homchalui/ui";
 import { getProductBySlug, type ProductDetail as ProductDetailVM } from "@/lib/products";
 import { getSessionId } from "@/lib/session";
 import { productAlternates } from "@/lib/locale";
@@ -87,6 +87,9 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
   const sessionId = getSessionId();
   const sourcePage = localizedPath(locale, `/product/${t.slug}`);
   const faq = parseFaq(t.faqItems);
+  const sp = p.scentProfile as {
+    scentFamily?: string | null; topNotes?: string[]; middleNotes?: string[]; baseNotes?: string[]; mood?: string[]; occasion?: string[];
+  } | null;
   const prices = p.merchantLinks.map((l) => l.price).filter((x): x is number => x != null);
   const cheapestPrice = prices.length ? Math.min(...prices) : null;
   const crumbs: Crumb[] = [
@@ -105,10 +108,7 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
 
         <div className="mt-4 grid gap-8 md:grid-cols-2">
           <div>
-            {p.mainImageUrl && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.mainImageUrl} alt={t.name} className="w-full rounded-2xl" />
-            )}
+            <Gallery images={p.mainImageUrl ? [{ url: p.mainImageUrl, alt: t.name }] : []} alt={t.name} locale={locale} />
           </div>
 
           <div>
@@ -149,6 +149,16 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
             </div>
           </div>
         </div>
+
+        <ScentProfile
+          topNotes={sp?.topNotes}
+          middleNotes={sp?.middleNotes}
+          baseNotes={sp?.baseNotes}
+          family={sp?.scentFamily}
+          mood={sp?.mood}
+          occasion={sp?.occasion}
+          locale={locale}
+        />
 
         {(t.pros.length > 0 || t.cons.length > 0) && (
           <section className="mt-10 grid gap-6 md:grid-cols-2">
@@ -203,6 +213,7 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
       <ProductActionBar
         locale={locale}
         productId={p.id}
+        productName={t.name}
         reviewCount={p.rating?.count ?? 0}
         merchantCount={p.merchantLinks.length}
       />

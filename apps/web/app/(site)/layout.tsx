@@ -4,6 +4,7 @@
 import { SiteHeader } from "@/components/SiteHeader";
 import { Footer } from "@/components/Footer";
 import { PageViewTracker } from "@/components/analytics/PageViewTracker";
+import { CompareTray } from "@/components/CompareTray";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -11,6 +12,7 @@ export default function SiteLayout({ children }: { children: React.ReactNode }) 
       <PageViewTracker locale="th" />
       <SiteHeader />
       {children}
+      <CompareTray locale="th" />
       <Footer locale="th" />
     </>
   );

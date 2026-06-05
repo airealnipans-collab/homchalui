@@ -85,7 +85,7 @@ async function main() {
   // ── Product (base) ──
   await db.product.upsert({
     where: { id: "prod_demo1" },
-    update: {},
+    update: { campaignTag: "best-clean" },
     create: {
       id: "prod_demo1",
       brandId: "brand_lelabe",
@@ -95,6 +95,7 @@ async function main() {
       priceMax: 369,
       currency: "THB",
       mainImageUrl: "https://cdn.homchalui.com/products/demo1/main.webp",
+      campaignTag: "best-clean",
     },
   });
 
@@ -264,6 +265,96 @@ async function main() {
       bestFor: "新手", notFor: "喜欢甜腻香的人", tested: false, sponsored: false, publishedAt: new Date(),
     },
   });
+
+  // ── Second product (so /compare needs ≥2 and /best lists multiple) ──
+  await db.product.upsert({
+    where: { id: "prod_demo2" },
+    update: { campaignTag: "best-clean" },
+    create: {
+      id: "prod_demo2", brandId: "brand_lelabe", primaryCategoryId: "cat_perfume", status: "published",
+      priceMin: 590, priceMax: 620, currency: "THB", mainImageUrl: "https://cdn.homchalui.com/products/demo2/main.webp",
+      campaignTag: "best-clean",
+    },
+  });
+  await db.productScore.upsert({
+    where: { productId: "prod_demo2" }, update: {},
+    create: { productId: "prod_demo2", scent: 8, longevity: 8.5, projection: 7.5, sillage: 7, value: 7, sweetness: 3, freshness: 6, luxury: 8.5, beginnerFriendly: 6, overallCached: 7.9 },
+  });
+  await db.productScentProfile.upsert({
+    where: { productId: "prod_demo2" }, update: {},
+    create: { productId: "prod_demo2", scentFamily: "woody", mood: ["calm", "warm"], season: ["winter"], occasion: ["evening"], genderTarget: "unisex", topNotes: ["bergamot"], middleNotes: ["cedar"], baseNotes: ["sandalwood", "amber"] },
+  });
+  const p2tr = [
+    { locale: "th" as const, name: "Le Labe Cedar Wood กลิ่นไม้", slug: "le-labe-cedar-wood", shortDescription: "กลิ่นไม้อบอุ่น ติดทนนาน เหมาะใส่ตอนเย็น", aeoSummary: "กลิ่นไม้ unisex ติดทนนาน เหมาะใส่ตอนเย็น" },
+    { locale: "en" as const, name: "Le Labe Cedar Wood", slug: "le-labe-cedar-wood", shortDescription: "Warm woody scent, long-lasting, great for evenings.", aeoSummary: "Unisex woody scent, long-lasting, great for evenings." },
+    { locale: "zh" as const, name: "Le Labe Cedar Wood 木质香", slug: "le-labe-cedar-wood", shortDescription: "温暖木质香，持久，适合晚间。", aeoSummary: "中性木质香，持久，适合晚间。" },
+  ];
+  for (const t of p2tr) {
+    await db.productTranslation.upsert({
+      where: { productId_locale: { productId: "prod_demo2", locale: t.locale } },
+      update: {},
+      create: { productId: "prod_demo2", ...t, pros: [], cons: [], translationStatus: "published", publishedAt: new Date() },
+    });
+  }
+  await db.productMerchantLink.upsert({
+    where: { id: "lnk_4" }, update: { affiliateUrl: "https://shopee.co.th/product/demo2?aff=homchalui", price: 590, status: "active" },
+    create: { id: "lnk_4", productId: "prod_demo2", merchantId: "mch_shopee", affiliateUrl: "https://shopee.co.th/product/demo2?aff=homchalui", price: 590, priority: 1, status: "active", currency: "THB" },
+  });
+
+  // ── Content: a buying guide + an article (th/en/zh, published) ──
+  const guide = await db.article.upsert({
+    where: { id: "art_guide1" },
+    update: { kind: "guide", status: "published" },
+    create: { id: "art_guide1", kind: "guide", status: "published", coverImageUrl: "https://cdn.homchalui.com/guide/choose.webp" },
+  });
+  const guideTr = [
+    { locale: "th" as const, title: "วิธีเลือกน้ำหอมให้เหมาะกับคุณ", slug: "how-to-choose-perfume",
+      excerpt: "คู่มือเลือกน้ำหอมฉบับมือใหม่ เข้าใจโน้ตกลิ่น ความติดทน และงบประมาณ",
+      content: "การเลือกน้ำหอมเริ่มจากเข้าใจกลุ่มกลิ่นที่ชอบ จากนั้นดูความติดทนและการกระจายตัว แล้วจึงเทียบราคาในงบที่ตั้งไว้\n\nมือใหม่ควรเริ่มจากกลิ่นสะอาด/สดชื่นที่ใส่ง่าย",
+      aeoSummary: "เลือกน้ำหอม: เริ่มจากกลุ่มกลิ่น → ความติดทน → งบประมาณ → ลองที่ผิวจริง",
+      faqItems: [{ q: "งบเท่าไหร่ดี?", a: "เริ่มที่ 300–1,000 บาทสำหรับมือใหม่" }] },
+    { locale: "en" as const, title: "How to choose the right perfume", slug: "how-to-choose-perfume",
+      excerpt: "A beginner's guide to scent families, longevity and budget.",
+      content: "Start from the scent families you like, then weigh longevity and projection, and finally compare prices within your budget.\n\nBeginners should start with easy clean/fresh scents.",
+      aeoSummary: "Choosing a perfume: scent family → longevity → budget → test on skin.",
+      faqItems: [{ q: "What budget?", a: "300–1,000 THB is a good start for beginners." }] },
+    { locale: "zh" as const, title: "如何挑选适合你的香水", slug: "how-to-choose-perfume",
+      excerpt: "新手指南：香调家族、持久度与预算。",
+      content: "先从你喜欢的香调家族入手，再权衡持久度与扩散度，最后在预算内比较价格。\n\n新手建议从清新干净、易驾驭的香调开始。",
+      aeoSummary: "挑选香水：香调家族 → 持久度 → 预算 → 上肤试香。",
+      faqItems: [{ q: "预算多少？", a: "新手 300–1,000 泰铢起步即可。" }] },
+  ];
+  for (const t of guideTr) {
+    await db.articleTranslation.upsert({
+      where: { articleId_locale: { articleId: guide.id, locale: t.locale } },
+      update: {},
+      create: { articleId: guide.id, ...t, status: "published" },
+    });
+  }
+
+  const post = await db.article.upsert({
+    where: { id: "art_post1" },
+    update: { kind: "article", status: "published" },
+    create: { id: "art_post1", kind: "article", status: "published", coverImageUrl: "https://cdn.homchalui.com/article/trends.webp" },
+  });
+  const postTr = [
+    { locale: "th" as const, title: "เทรนด์กลิ่นหอมปีนี้", slug: "scent-trends",
+      excerpt: "อัปเดตเทรนด์กลิ่นที่กำลังมาแรง", content: "ปีนี้กลิ่นสะอาดและกลิ่นชาเขียวกำลังได้รับความนิยม...",
+      aeoSummary: "เทรนด์ปีนี้: กลิ่นสะอาด ชาเขียว และมัสก์อ่อน ๆ", faqItems: [{ q: "กลิ่นไหนมาแรง?", a: "กลิ่นสะอาดและชาเขียว" }] },
+    { locale: "en" as const, title: "This year's scent trends", slug: "scent-trends",
+      excerpt: "The fragrance trends taking off right now.", content: "Clean and green-tea scents are trending this year...",
+      aeoSummary: "Trends: clean scents, green tea, soft musk.", faqItems: [{ q: "What's hot?", a: "Clean and green-tea scents." }] },
+    { locale: "zh" as const, title: "今年的香氛趋势", slug: "scent-trends",
+      excerpt: "当下正流行的香氛趋势。", content: "今年干净调与绿茶调正在流行……",
+      aeoSummary: "趋势：干净调、绿茶调、柔和麝香。", faqItems: [{ q: "什么最流行？", a: "干净调与绿茶调。" }] },
+  ];
+  for (const t of postTr) {
+    await db.articleTranslation.upsert({
+      where: { articleId_locale: { articleId: post.id, locale: t.locale } },
+      update: {},
+      create: { articleId: post.id, ...t, status: "published" },
+    });
+  }
 
   // Home layout (Thai) with a couple of sections
   const home = await db.layoutPage.upsert({

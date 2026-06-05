@@ -11,3 +11,5 @@ export * from "./ListTracker";
 export * from "./Breadcrumb";
 export * from "./FAQBlock";
 export * from "./ReviewSummary";
+export * from "./ScentProfile";
+export * from "./Gallery";

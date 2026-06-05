@@ -4,21 +4,22 @@
 // "สั่งซื้อ" scrolls to the merchant list (#merchants) which uses MerchantButton (tracked
 // outbound). It never links to a raw affiliate URL. "เทียบ" adds to the compare tray.
 import type { Locale } from "@homchalui/i18n";
+import { addToCompare } from "@/components/compare-store";
 
 interface Props {
   locale: Locale;
   reviewCount: number;
   merchantCount: number;
-  /** Optional handler to add this product to the compare tray. */
-  onCompare?: () => void;
   productId: string;
+  productName: string;
 }
 
 function scrollTo(id: string) {
   document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
 }
 
-export function ProductActionBar({ reviewCount, merchantCount, onCompare }: Props) {
+export function ProductActionBar({ reviewCount, merchantCount, productId, productName }: Props) {
+  const onCompare = () => addToCompare({ id: productId, name: productName });
   return (
     <div className="sticky bottom-0 z-20 flex items-center gap-2 border-t border-line bg-card px-3 py-2.5">
       <button
