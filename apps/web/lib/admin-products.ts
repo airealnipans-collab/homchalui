@@ -123,6 +123,16 @@ export async function updateProduct(id: string, input: ProductUpdate, actorId: s
     });
 
     await writeAudit({ actorId, action: "product.update", entityType: "product", entityId: id, before, after: input, ip });
+
+    // Integrity: editing the Thai source flags published/approved en+zh translations as outdated
+    // (Thai-source-of-truth; no stale fallback — TRANSLATION_WORKFLOW / CLAUDE.md §i18n).
+    if ((input.translations ?? []).some((t) => t.locale === "th")) {
+      await db.productTranslation.updateMany({
+        where: { productId: id, locale: { in: ["en", "zh"] }, translationStatus: { in: ["published", "approved"] } },
+        data: { translationStatus: "outdated" },
+      });
+    }
+
     const touched = [
       ...before.translations.map((t) => ({ locale: t.locale, slug: t.slug })),
       ...(input.translations ?? []).map((t) => ({ locale: t.locale, slug: t.slug })),

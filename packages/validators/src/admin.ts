@@ -161,6 +161,31 @@ export const seoFix = z.object({
 });
 export type SeoFix = z.infer<typeof seoFix>;
 
+// ───────────────────────── Translations ─────────────────────────
+export const TRANSLATION_STATUSES = [
+  "missing", "draft", "machine_translated", "needs_review", "approved", "published", "outdated",
+] as const;
+export type TranslationStatusValue = (typeof TRANSLATION_STATUSES)[number];
+
+export const translationEntityType = z.enum(["product", "article"]);
+export type TranslationEntityType = z.infer<typeof translationEntityType>;
+
+/** Statuses an editor can set (not "missing"). Publish requires "approved" (enforced server-side). */
+export const settableTranslationStatus = z.enum(["draft", "needs_review", "approved", "published", "outdated"]);
+
+export const translationStatusUpdate = z.object({
+  entityType: translationEntityType,
+  status: settableTranslationStatus,
+});
+export type TranslationStatusUpdate = z.infer<typeof translationStatusUpdate>;
+
+export const generateDraftInput = z.object({
+  entityType: translationEntityType,
+  entityId: z.string().min(1),
+  targetLocale: z.enum(["en", "zh"]), // Thai is the source of truth
+});
+export type GenerateDraftInput = z.infer<typeof generateDraftInput>;
+
 // ───────────────────────── Uploads ─────────────────────────
 export const IMAGE_MIME = ["image/png", "image/jpeg", "image/webp", "image/avif"] as const;
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB
