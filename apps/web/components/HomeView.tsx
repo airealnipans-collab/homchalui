@@ -8,6 +8,7 @@ import { listProducts } from "@/lib/listing";
 import { resolveListQuery } from "@/lib/list-page";
 import { getSessionId } from "@/lib/session";
 import { LayoutSectionRenderer } from "./LayoutSectionRenderer";
+import { RecentlyViewed } from "./RecentlyViewed";
 
 const HERO: Record<Locale, { title: string; subtitle: string; latest: string }> = {
   th: { title: "หอมฉลุย", subtitle: "รีวิว เปรียบเทียบ และเลือกของหอมที่ใช่ แล้วกดไปซื้อผ่านร้านที่ต้องการ", latest: "รีวิวล่าสุด" },
@@ -23,6 +24,7 @@ export async function HomeView({ locale }: { locale: Locale }) {
     return (
       <main className="mx-auto max-w-6xl px-4 py-8">
         <LayoutSectionRenderer sections={sections} locale={locale} sessionId={sessionId} />
+        <RecentlyViewed locale={locale} />
       </main>
     );
   }
@@ -40,6 +42,7 @@ export async function HomeView({ locale }: { locale: Locale }) {
         <h2 className="mb-4 text-xl font-semibold text-brand-dark">{hero.latest}</h2>
         <ProductGrid items={items} locale={locale} listName="home:latest" sessionId={sessionId} />
       </section>
+      <RecentlyViewed locale={locale} />
     </main>
   );
 }

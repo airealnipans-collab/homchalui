@@ -16,6 +16,7 @@ const NAV: { href: string; label: string; perm?: Parameters<typeof hasPermission
   { href: "/admin/seo", label: "SEO", perm: "seo.update" },
   { href: "/admin/translations", label: "คำแปล", perm: "translation.update" },
   { href: "/admin/ranking", label: "อันดับ", perm: "algorithm.update" },
+  { href: "/admin/analytics", label: "วิเคราะห์", perm: "analytics.view" },
 ];
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {

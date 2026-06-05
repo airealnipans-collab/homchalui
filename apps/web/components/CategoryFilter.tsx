@@ -12,13 +12,13 @@ import { track } from "@homchalui/ui";
 const T: Record<Locale, Record<string, string>> = {
   th: { title: "ตัวกรอง", price: "ช่วงราคา (บาท)", min: "ต่ำสุด", max: "สูงสุด", gender: "เพศ", any: "ทั้งหมด",
     men: "ผู้ชาย", women: "ผู้หญิง", unisex: "ยูนิเซ็กส์", rating: "คะแนนรีวิวขั้นต่ำ", merchant: "ร้านค้า",
-    apply: "ใช้ตัวกรอง", clear: "ล้าง", up: "ขึ้นไป" },
+    apply: "ใช้ตัวกรอง", clear: "ล้าง", up: "ขึ้นไป", scent: "ตระกูลกลิ่น", longevity: "ความติดทนขั้นต่ำ", mood: "อารมณ์" },
   en: { title: "Filters", price: "Price (THB)", min: "Min", max: "Max", gender: "Gender", any: "Any",
     men: "Men", women: "Women", unisex: "Unisex", rating: "Min rating", merchant: "Merchant",
-    apply: "Apply", clear: "Clear", up: "& up" },
+    apply: "Apply", clear: "Clear", up: "& up", scent: "Scent family", longevity: "Min longevity", mood: "Mood" },
   zh: { title: "筛选", price: "价格 (泰铢)", min: "最低", max: "最高", gender: "性别", any: "全部",
     men: "男士", women: "女士", unisex: "中性", rating: "最低评分", merchant: "商家",
-    apply: "应用", clear: "清除", up: "及以上" },
+    apply: "应用", clear: "清除", up: "及以上", scent: "香调", longevity: "最低持久度", mood: "氛围" },
 };
 const MERCHANT_LABEL: Record<string, string> = {
   shopee: "Shopee", lazada: "Lazada", central: "Central", amazon: "Amazon", tiktok: "TikTok Shop",
@@ -37,6 +37,9 @@ export function CategoryFilter({ locale }: { locale: Locale }) {
   const [gender, setGender] = useState(searchParams.get("gender") ?? "");
   const [minRating, setMinRating] = useState(searchParams.get("minRating") ?? "");
   const [merchant, setMerchant] = useState(searchParams.get("merchant") ?? "");
+  const [scent, setScent] = useState(searchParams.get("scent") ?? "");
+  const [longevity, setLongevity] = useState(searchParams.get("longevity") ?? "");
+  const [mood, setMood] = useState(searchParams.get("mood") ?? "");
 
   function apply() {
     const params = new URLSearchParams(searchParams.toString());
@@ -46,10 +49,13 @@ export function CategoryFilter({ locale }: { locale: Locale }) {
     set("gender", gender);
     set("minRating", minRating);
     set("merchant", merchant);
+    set("scent", scent);
+    set("longevity", longevity);
+    set("mood", mood);
     params.delete("page");
     track("filter_apply", locale, {
       filter_type: "panel",
-      filter_value: JSON.stringify({ minPrice, maxPrice, gender, minRating, merchant }),
+      filter_value: JSON.stringify({ minPrice, maxPrice, gender, minRating, merchant, scent, longevity, mood }),
     });
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
     setOpen(false);
@@ -57,6 +63,7 @@ export function CategoryFilter({ locale }: { locale: Locale }) {
 
   function clear() {
     setMinPrice(""); setMaxPrice(""); setGender(""); setMinRating(""); setMerchant("");
+    setScent(""); setLongevity(""); setMood("");
     const params = new URLSearchParams();
     const sort = searchParams.get("sort");
     if (sort) params.set("sort", sort);
@@ -121,6 +128,24 @@ export function CategoryFilter({ locale }: { locale: Locale }) {
               <option key={m} value={m}>{MERCHANT_LABEL[m]}</option>
             ))}
           </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium text-text-secondary">{t.scent}</span>
+          <input value={scent} onChange={(e) => setScent(e.target.value)} placeholder="woody, fresh-floral…" className={field} />
+        </label>
+
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium text-text-secondary">{t.longevity}</span>
+          <select value={longevity} onChange={(e) => setLongevity(e.target.value)} className={field}>
+            <option value="">{t.any}</option>
+            {[8, 7, 6, 5].map((n) => <option key={n} value={n}>{n} {t.up}</option>)}
+          </select>
+        </label>
+
+        <label className="block">
+          <span className="mb-1.5 block text-xs font-medium text-text-secondary">{t.mood}</span>
+          <input value={mood} onChange={(e) => setMood(e.target.value)} placeholder="clean, calm…" className={field} />
         </label>
 
         <div className="flex gap-2 pt-1">
