@@ -6,6 +6,10 @@
   "exports": {
     ".": "./src/index.ts"
   },
+  "dependencies": {
+    "@homchalui/db": "workspace:*",
+    "@homchalui/redis": "workspace:*"
+  },
   "devDependencies": {
     "typescript": "^5.5.0"
   }

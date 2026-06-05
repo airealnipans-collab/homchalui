@@ -25,6 +25,7 @@
     "@homchalui/config": "workspace:*",
     "@homchalui/db": "workspace:*",
     "@homchalui/i18n": "workspace:*",
+    "@homchalui/ranking": "workspace:*",
     "@homchalui/redis": "workspace:*",
     "@homchalui/ui": "workspace:*",
     "@homchalui/validators": "workspace:*"

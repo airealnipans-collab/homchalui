@@ -186,6 +186,27 @@ export const generateDraftInput = z.object({
 });
 export type GenerateDraftInput = z.infer<typeof generateDraftInput>;
 
+// ───────────────────────── Ranking ─────────────────────────
+export const rankingKey = z.enum(["trending", "best_click", "editorial", "personalize"]);
+export type RankingKeyValue = z.infer<typeof rankingKey>;
+/** Keys that have a recompute implementation (personalize is consent-gated, later). */
+export const recomputableRankingKey = z.enum(["trending", "best_click", "editorial"]);
+
+export const rankingConfigInput = z.object({
+  key: rankingKey,
+  weights: z.record(z.coerce.number()),
+  timeWindow: z.string().optional(),
+  bouncePenalty: z.coerce.number().min(0).default(0),
+  activate: z.boolean().default(true), // make this new version the active one
+});
+export type RankingConfigInput = z.infer<typeof rankingConfigInput>;
+
+export const rankingRecalcInput = z.object({
+  key: recomputableRankingKey,
+  locale: adminLocale.optional(), // omit → all locales
+});
+export type RankingRecalcInput = z.infer<typeof rankingRecalcInput>;
+
 // ───────────────────────── Uploads ─────────────────────────
 export const IMAGE_MIME = ["image/png", "image/jpeg", "image/webp", "image/avif"] as const;
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB

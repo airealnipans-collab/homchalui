@@ -66,6 +66,20 @@ async function main() {
     await db.merchant.upsert({ where: { id: m.id }, update: { name: m.name, baseDomain: m.baseDomain }, create: m });
   }
 
+  // ── Ranking configs (v1 active per key; admin-tunable) ──
+  const rankingDefaults = [
+    { key: "trending" as const, weights: { view_count: 1, outbound_click: 3, product_detail_click: 2, wishlist_count: 2, review_engagement: 1.5 } },
+    { key: "best_click" as const, weights: { outbound_click: 5, unique_clicker: 3, ctr: 2 } },
+    { key: "editorial" as const, weights: { overall: 5, luxury: 1.5, value: 1.5, beginner: 1 } },
+  ];
+  for (const r of rankingDefaults) {
+    await db.rankingConfig.upsert({
+      where: { key_version: { key: r.key, version: 1 } },
+      update: { weights: r.weights, isActive: true },
+      create: { key: r.key, version: 1, weights: r.weights, isActive: true, bouncePenalty: 0 },
+    });
+  }
+
   // ── Brand + Thai translation ──
   await db.brand.upsert({ where: { id: "brand_lelabe" }, update: {}, create: { id: "brand_lelabe" } });
   await db.brandTranslation.upsert({

@@ -8,6 +8,7 @@ const nextConfig = {
     "@homchalui/config",
     "@homchalui/db",
     "@homchalui/i18n",
+    "@homchalui/ranking",
     "@homchalui/redis",
     "@homchalui/ui",
     "@homchalui/validators",

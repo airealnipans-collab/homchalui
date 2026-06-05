@@ -35,6 +35,9 @@ importers:
       '@homchalui/i18n':
         specifier: workspace:*
         version: link:../../packages/i18n
+      '@homchalui/ranking':
+        specifier: workspace:*
+        version: link:../../packages/ranking
       '@homchalui/redis':
         specifier: workspace:*
         version: link:../../packages/redis
@@ -201,6 +204,13 @@ importers:
         version: 2.1.9(@types/node@20.19.41)
 
   packages/ranking:
+    dependencies:
+      '@homchalui/db':
+        specifier: workspace:*
+        version: link:../db
+      '@homchalui/redis':
+        specifier: workspace:*
+        version: link:../redis
     devDependencies:
       typescript:
         specifier: ^5.5.0
