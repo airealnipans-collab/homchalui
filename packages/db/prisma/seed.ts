@@ -241,6 +241,30 @@ async function main() {
     },
   });
 
+  // English review (demo — marked tested to showcase the integrity badge)
+  await db.productReview.upsert({
+    where: { id: "rev_demo_en" },
+    update: {},
+    create: {
+      id: "rev_demo_en", productId: "prod_demo1", locale: "en",
+      title: "Clean and great value", body: "Easy to wear all day at the office; not harsh. Very beginner-friendly.",
+      reviewer: "Homchalui team", rating: 4.4, pros: ["Clean scent", "Great value"], cons: ["Moderate longevity"],
+      bestFor: "Beginners", notFor: "Lovers of very sweet scents", tested: true, sponsored: false, publishedAt: new Date(),
+    },
+  });
+
+  // Chinese review (demo)
+  await db.productReview.upsert({
+    where: { id: "rev_demo_zh" },
+    update: {},
+    create: {
+      id: "rev_demo_zh", productId: "prod_demo1", locale: "zh",
+      title: "干净且高性价比", body: "通勤一整天都很好驾驭，不刺鼻，非常适合新手。",
+      reviewer: "หอมฉลุย 团队", rating: 4.2, pros: ["干净", "高性价比"], cons: ["持久度中等"],
+      bestFor: "新手", notFor: "喜欢甜腻香的人", tested: false, sponsored: false, publishedAt: new Date(),
+    },
+  });
+
   // Home layout (Thai) with a couple of sections
   const home = await db.layoutPage.upsert({
     where: { key_locale: { key: "home", locale: "th" } },

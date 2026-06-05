@@ -11,6 +11,7 @@ import { SignOutButton } from "@/components/admin/SignOutButton";
 const NAV: { href: string; label: string; perm?: Parameters<typeof hasPermission>[1] }[] = [
   { href: "/admin/dashboard", label: "แดชบอร์ด" },
   { href: "/admin/products", label: "สินค้า", perm: "product.update" },
+  { href: "/admin/reviews", label: "รีวิว", perm: "review.publish" },
 ];
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {

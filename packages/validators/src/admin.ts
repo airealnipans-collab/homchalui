@@ -125,6 +125,30 @@ export type MerchantLinkUpsert = z.infer<typeof merchantLinkUpsert>;
 export const merchantLinkUpdate = merchantLinkUpsert.partial();
 export type MerchantLinkUpdate = z.infer<typeof merchantLinkUpdate>;
 
+// ───────────────────────── Reviews ─────────────────────────
+// Integrity (CLAUDE.md §2.6): no fake reviews; `tested` only when genuinely tested (UI requires an
+// explicit confirm); `sponsored` is stored and surfaced with a visible label on the front.
+const reviewBase = z.object({
+  productId: z.string().min(1),
+  locale: adminLocale,
+  title: z.string().min(1).max(200),
+  body: z.string().min(1),
+  reviewer: z.string().max(120).optional(),
+  rating: z.coerce.number().min(0).max(5),
+  pros: z.array(z.string()).default([]),
+  cons: z.array(z.string()).default([]),
+  bestFor: z.string().optional(),
+  notFor: z.string().optional(),
+  tested: z.boolean().default(false),
+  sponsored: z.boolean().default(false),
+  published: z.boolean().default(false), // maps to publishedAt
+});
+
+export const reviewCreate = reviewBase;
+export type ReviewCreate = z.infer<typeof reviewCreate>;
+export const reviewUpdate = reviewBase.partial();
+export type ReviewUpdate = z.infer<typeof reviewUpdate>;
+
 // ───────────────────────── Uploads ─────────────────────────
 export const IMAGE_MIME = ["image/png", "image/jpeg", "image/webp", "image/avif"] as const;
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB

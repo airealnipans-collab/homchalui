@@ -6,7 +6,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { localizedPath, type Locale } from "@homchalui/i18n";
-import { Breadcrumb, FAQBlock, type FaqItem } from "@homchalui/ui";
+import { Breadcrumb, FAQBlock, ReviewSummary, type FaqItem } from "@homchalui/ui";
 import { getProductBySlug, type ProductDetail as ProductDetailVM } from "@/lib/products";
 import { getSessionId } from "@/lib/session";
 import { productAlternates } from "@/lib/locale";
@@ -26,6 +26,7 @@ const HOME_LABEL: Record<Locale, string> = { th: "หน้าแรก", en: "H
 const PROS: Record<Locale, string> = { th: "ข้อดี", en: "Pros", zh: "优点" };
 const CONS: Record<Locale, string> = { th: "ข้อที่ต้องคิดก่อนซื้อ", en: "Cons", zh: "缺点" };
 const REVIEW_SUMMARY: Record<Locale, string> = { th: "สรุปรีวิว", en: "Review summary", zh: "评测摘要" };
+const REVIEWS_HEADING: Record<Locale, string> = { th: "รีวิว", en: "Reviews", zh: "评测" };
 const REVIEWS_WORD: Record<Locale, string> = { th: "รีวิว", en: "reviews", zh: "条评测" };
 
 function parseFaq(raw: unknown): FaqItem[] {
@@ -162,10 +163,37 @@ export async function ProductDetail({ slug, locale }: { slug: string; locale: Lo
           </section>
         )}
 
-        {t.reviewSummary && (
+        {(t.reviewSummary || p.reviews.length > 0) && (
           <section id="reviews" className="mt-10">
-            <h2 className="mb-2 font-semibold">{REVIEW_SUMMARY[locale]}</h2>
-            <p className="text-sm leading-relaxed">{t.reviewSummary}</p>
+            {t.reviewSummary && (
+              <>
+                <h2 className="mb-2 font-semibold">{REVIEW_SUMMARY[locale]}</h2>
+                <p className="text-sm leading-relaxed">{t.reviewSummary}</p>
+              </>
+            )}
+            {p.reviews.length > 0 && (
+              <>
+                <h2 className="mb-3 mt-6 font-semibold">{REVIEWS_HEADING[locale]} ({p.reviews.length})</h2>
+                <div className="space-y-3">
+                  {p.reviews.map((r) => (
+                    <ReviewSummary
+                      key={r.id}
+                      locale={locale}
+                      title={r.title}
+                      summary={r.body}
+                      reviewer={r.reviewer}
+                      rating={r.rating}
+                      pros={r.pros}
+                      cons={r.cons}
+                      bestFor={r.bestFor}
+                      notFor={r.notFor}
+                      tested={r.tested}
+                      sponsored={r.sponsored}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </section>
         )}
 

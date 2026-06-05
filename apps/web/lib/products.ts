@@ -33,6 +33,21 @@ export interface ProductDetail {
   };
   merchantLinks: { id: string; merchant: string; price: number | null; go: string }[];
   rating: { value: number; count: number } | null;
+  reviews: ReviewVM[];
+}
+
+export interface ReviewVM {
+  id: string;
+  title: string;
+  body: string;
+  reviewer: string | null;
+  rating: number;
+  pros: string[];
+  cons: string[];
+  bestFor: string | null;
+  notFor: string | null;
+  tested: boolean;
+  sponsored: boolean;
 }
 
 /** Cache-key includes locale; tag enables invalidation on publish. */
@@ -63,7 +78,14 @@ async function loadProductBySlug(slug: string, locale: Locale): Promise<ProductD
             orderBy: { priority: "asc" },
             select: { id: true, price: true, merchant: { select: { name: true } } },
           },
-          reviews: { where: { locale, publishedAt: { not: null } }, select: { rating: true } },
+          reviews: {
+            where: { locale, publishedAt: { not: null } },
+            orderBy: { publishedAt: "desc" },
+            select: {
+              id: true, title: true, body: true, reviewer: true, rating: true,
+              pros: true, cons: true, bestFor: true, notFor: true, tested: true, sponsored: true,
+            },
+          },
         },
       },
     },
@@ -102,5 +124,18 @@ async function loadProductBySlug(slug: string, locale: Locale): Promise<ProductD
       go: `/go/${l.id}?locale=${locale}`, // tracked outbound — never the raw affiliate URL
     })),
     rating,
+    reviews: p.reviews.map((r) => ({
+      id: r.id,
+      title: r.title,
+      body: r.body,
+      reviewer: r.reviewer,
+      rating: r.rating,
+      pros: r.pros,
+      cons: r.cons,
+      bestFor: r.bestFor,
+      notFor: r.notFor,
+      tested: r.tested,
+      sponsored: r.sponsored,
+    })),
   };
 }

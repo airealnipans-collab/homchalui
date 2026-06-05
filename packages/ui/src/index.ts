@@ -10,3 +10,4 @@ export * from "./ProductGrid";
 export * from "./ListTracker";
 export * from "./Breadcrumb";
 export * from "./FAQBlock";
+export * from "./ReviewSummary";
