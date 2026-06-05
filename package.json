@@ -16,9 +16,11 @@
     "test": "turbo run test",
     "db:migrate": "pnpm --filter @homchalui/db migrate:dev",
     "db:seed": "pnpm --filter @homchalui/db seed",
+    "test:e2e": "playwright test",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\""
   },
   "devDependencies": {
+    "@playwright/test": "^1.47.0",
     "turbo": "^2.0.0",
     "prettier": "^3.3.0",
     "typescript": "^5.5.0"

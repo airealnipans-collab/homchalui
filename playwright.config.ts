@@ -1,0 +1,23 @@
+// playwright.config.ts — E2E for หอมฉลุย. Powered by 2T9COME.
+// Starts (or reuses) the web dev server; needs Postgres + Redis up and the demo seed loaded.
+import { defineConfig, devices } from "@playwright/test";
+
+export default defineConfig({
+  testDir: "./e2e",
+  timeout: 30_000,
+  expect: { timeout: 10_000 },
+  fullyParallel: false,
+  retries: 0,
+  reporter: [["list"]],
+  use: {
+    baseURL: "http://localhost:3000",
+    trace: "on-first-retry",
+  },
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+  webServer: {
+    command: "pnpm --filter @homchalui/web dev",
+    url: "http://localhost:3000",
+    reuseExistingServer: true,
+    timeout: 120_000,
+  },
+});
