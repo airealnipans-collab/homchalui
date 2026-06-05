@@ -149,6 +149,18 @@ export type ReviewCreate = z.infer<typeof reviewCreate>;
 export const reviewUpdate = reviewBase.partial();
 export type ReviewUpdate = z.infer<typeof reviewUpdate>;
 
+// ───────────────────────── SEO manager ─────────────────────────
+export const seoEntityType = z.enum(["product", "article", "category"]);
+export type SeoEntityType = z.infer<typeof seoEntityType>;
+
+/** Inline SEO fix: update the seoTitle/seoDescription of a translation row. */
+export const seoFix = z.object({
+  entityType: seoEntityType,
+  seoTitle: z.string().max(200).optional(),
+  seoDescription: z.string().max(320).optional(),
+});
+export type SeoFix = z.infer<typeof seoFix>;
+
 // ───────────────────────── Uploads ─────────────────────────
 export const IMAGE_MIME = ["image/png", "image/jpeg", "image/webp", "image/avif"] as const;
 export const MAX_UPLOAD_BYTES = 5 * 1024 * 1024; // 5 MB

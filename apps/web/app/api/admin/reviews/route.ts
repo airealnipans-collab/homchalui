@@ -6,6 +6,7 @@ import { authorize, toErrorResponse } from "@/lib/rbac";
 import { createReview, listReviewsAdmin } from "@/lib/admin-reviews";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 function clientIp(req: NextRequest): string {
   return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "0.0.0.0";
