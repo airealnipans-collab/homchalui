@@ -12,6 +12,7 @@ const NAV: { href: string; label: string; perm?: Parameters<typeof hasPermission
   { href: "/admin/dashboard", label: "แดชบอร์ด" },
   { href: "/admin/products", label: "สินค้า", perm: "product.update" },
   { href: "/admin/reviews", label: "รีวิว", perm: "review.publish" },
+  { href: "/admin/layout", label: "เลย์เอาต์", perm: "layout.update" },
 ];
 
 export default async function PanelLayout({ children }: { children: React.ReactNode }) {
